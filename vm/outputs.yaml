@@ -28,6 +28,7 @@ capabilities:
         - get_attribute: [ ssh_keys, secret_key_name ]
         - "_private"
 
+# Enable this to display default NAT/Host Network IP
   # endpoint_NAT_ip:
   #   description: NativeEdge Endpoint Default Host Network IP
   #   value:

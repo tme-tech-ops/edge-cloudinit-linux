@@ -22,6 +22,7 @@ input_groups:
     collapsible: true
     index: 1
     inputs:
+      - os_type
       - vm_hostname
       - vm_user_name
       - vm_password
@@ -30,10 +31,18 @@ input_groups:
       - os_disk_size
       - disk_wrapper
       - additional_disks
+  adv_boot:
+    display_label: Advanced Boot Options
+    collapsible: true
+    index: 2
+    inputs:
+      - hardware_options.vTPM
+      - hardware_options.secure_boot
+      - hardware_options.firmware_type
   device_passthrough:
     display_label: Device Passthrough
     collapsible: true
-    index: 2
+    index: 3
     inputs:
       - use_passthrough
       - pcie
@@ -44,7 +53,7 @@ input_groups:
   network:
     display_label: Network Configuration
     collapsible: true
-    index: 3
+    index: 4
     inputs:
       - vnic_0_segment_name
       - use_dhcp

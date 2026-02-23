@@ -69,6 +69,30 @@ inputs:
       index: 30
   
 # Resource inputs
+
+  os_type:
+    type: string
+    hidden: true
+    allow_update: false
+    display_label: OS Type
+    description: The virtual machine Operating System.
+    default: UBUNTU22.04
+    constraints:
+      - valid_values:
+        - "UBUNTU18.04"
+        - "UBUNTU20.04"
+        - "UBUNTU22.04"
+        - "UBUNTU22.10"
+        - "UBUNTU24.04"
+        - "DEBIAN-32B"
+        - "DEBIAN-64B"
+        - "RHEL9"
+        - "SUSE-SLES15"
+        - "LINUX-OTHER"
+    display:
+      group: vm
+      index: 5
+
   vcpus:
     type: integer
     hidden: false
@@ -147,6 +171,49 @@ inputs:
     display:
       group: vm
       index: 50
+
+# Advanced Boot Options
+
+  hardware_options.secure_boot:
+    type: boolean
+    hidden: false
+    allow_update: false
+    required: false
+    display_label: Secure Boot
+    description: |
+      Enable secure boot.
+    default: false
+    display:
+      group: adv_boot
+      index: 10
+
+  hardware_options.firmware_type:
+    type: string
+    hidden: false
+    allow_update: false
+    display_label: Firmware Type
+    description: |
+      The firmware type configured in the Virtual Machine.
+    default: BIOS
+    constraints:
+      - valid_values: [BIOS, UEFI]
+    display:
+      group: adv_boot
+      index: 20
+
+  hardware_options.vTPM:
+    type: boolean
+    hidden: false
+    allow_update: false
+    required: false
+    display_label: Add vTPM
+    description: |
+      Enable vTPM.
+      Typically required for Secure Boot.
+    default: false
+    display:
+      group: adv_boot
+      index: 30
 
 # Passthrough device inputs
   use_passthrough:
@@ -520,85 +587,6 @@ inputs:
 ### Hidden inputs ###
 
 # Hidden VM
-  os_type:
-    type: string
-    hidden: true
-    allow_update: false
-    display_label: OS Type
-    description: The virtual machine Operating System.
-    default: UBUNTU22.04
-    constraints:
-      - valid_values:
-        - "UBUNTU16.04-32B"
-        - "UBUNTU16.04-64B"
-        - "UBUNTU18.04"
-        - "UBUNTU20.04"
-        - "UBUNTU20.10"
-        - "UBUNTU21.04"
-        - "UBUNTU21.10"
-        - "UBUNTU22.04"
-        - "UBUNTU22.10"
-        - "UBUNTU23.04"
-        - "UBUNTU24.04"
-        - "CENTOS9"
-        - "CENTOS8"
-        - "DEB-LINUX12-32B"
-        - "DEB-LINUX12-64B"
-        - "DEB-LINUX11-32B"
-        - "DEB-LINUX11-64B"
-        - "DEB-LINUX10-32B"
-        - "DEB-LINUX10-64B"
-        - "FREEBSD13-32B"
-        - "FREEBSD13-64B"
-        - "FREEBSD12-32B"
-        - "FREEBSD12-64B"
-        - "FREEBSD11-32B"
-        - "FREEBSD11-64B"
-        - "ORCL-LINUX9"
-        - "ORCL-LINUX8"
-        - "RHEL9"
-        - "RHEL8"
-        - "SUSE-SLES15"
-        - "SUSE-SLED15"
-        - "SUSE-SLES12"
-        - "SUSE-SLED12"
-        - "LINUX-OTHERS"
-        - "OTHERS"
-
-
-  hardware_options.vTPM:
-    type: boolean
-    hidden: true
-    allow_update: false
-    required: false
-    display_label: Hardware Options - vTPM
-    description: |
-      Enable vTPM.
-      Required for For Windows 11 OS, optional for other OS.
-    default: false
-
-  hardware_options.secure_boot:
-    type: boolean
-    hidden: true
-    allow_update: false
-    required: false
-    display_label: Hardware Options - Secure Boot
-    description: |
-      Enable secure boot.
-      Required for For Windows 11 OS, optional for other OS.
-    default: false
-
-  hardware_options.firmware_type:
-    type: string
-    hidden: true
-    allow_update: false
-    display_label: Hardware Options - Firmware Type
-    description: |
-      The firmware type configured in the Virtual Machine.
-      For Windows 11 OS this must be UEFI.
-    default: BIOS
-    constraints:
-      - valid_values: [BIOS, UEFI]
 
   disk_controller:
     type: string
@@ -684,19 +672,6 @@ inputs:
       If empty no changes will be made.
     default: []
 
-# Hidden Network
-  # network_settings: # THIS INPUT IS NOT NEEDED, handled by network_config node template
-  #   type: list
-  #   item_type: dell.types.nativeedge.VMDeployNetworkSettings
-  #   hidden: true
-  #   allow_update: true
-  #   display_label: Network Settings
-  #   description: List of VMDeployNetworkSettings.
-  #   default:
-  #   - name: VNIC1
-  #     segment_name: { get_input: vnic_0_segment_name }
-  #     port_fwd_rules: { get_input: port_forward_rules }
-
   # port_forward_host_ip: # THIS INPUT IS NOT NEEDED, reference for displaying the default host IP
   #   type: string
   #   hidden: true
@@ -778,10 +753,14 @@ data_types:
         type: string
         required: false
         description: Protocol ("TCP", "UDP")
+        constraints:
+          - valid_values: [ TCP, UDP ]
       service_type:
         type: string
         required: false
         description: Service Type ("SSH", "HTTP", "CUSTOM")
+        constraints:
+          - valid_values: [ SSH, HTTP, CUSTOM ]
       vm_port:
         type: string
         required: false
