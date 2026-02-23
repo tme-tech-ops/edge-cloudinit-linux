@@ -72,7 +72,7 @@ inputs:
 
   os_type:
     type: string
-    hidden: true
+    hidden: false
     allow_update: false
     display_label: OS Type
     description: The virtual machine Operating System.
