@@ -141,6 +141,23 @@ inputs:
       group: vm
       index: 30
 
+  disk_controller:
+    type: string
+    display_label: Disk controller
+    allow_update: true
+    description: >
+      Deployment disk controller.
+    default: VIRTIO
+    hidden: false
+    constraints:
+      - valid_values:
+          - 'VIRTIO'
+          - 'SATA'
+          - 'SCSI'
+    display:
+      group: vm
+      index: 35
+
   disk_wrapper:
     type: string
     display_label: Endpoint Datastore Path
@@ -587,20 +604,6 @@ inputs:
 ### Hidden inputs ###
 
 # Hidden VM
-
-  disk_controller:
-    type: string
-    display_label: Disk controller
-    allow_update: true
-    description: >
-      Deployment disk controller.
-    default: VIRTIO
-    hidden: true
-    constraints:
-      - valid_values:
-          - 'VIRTIO'
-          - 'SATA'
-          - 'SCSI'
 
   disk:
     type: string

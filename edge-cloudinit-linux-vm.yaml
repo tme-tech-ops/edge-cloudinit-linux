@@ -29,6 +29,7 @@ input_groups:
       - vcpus
       - memory_size
       - os_disk_size
+      - disk_controller
       - disk_wrapper
       - additional_disks
   adv_boot:
