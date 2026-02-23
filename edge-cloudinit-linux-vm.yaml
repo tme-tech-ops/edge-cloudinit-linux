@@ -29,6 +29,7 @@ input_groups:
       - memory_size
       - os_disk_size
       - disk_wrapper
+      - additional_disks
   device_passthrough:
     display_label: Device Passthrough
     collapsible: true

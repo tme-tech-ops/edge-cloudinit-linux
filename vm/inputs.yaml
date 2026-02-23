@@ -134,6 +134,20 @@ inputs:
       group: vm
       index: 40
 
+  additional_disks:
+    type: list
+    item_type: additional_disks
+    hidden: false
+    allow_update: false
+    display_label: Optional list of additional Virtual Disks
+    description: >
+      List of additional virtual disks to be created.
+    required: false
+    default: []
+    display:
+      group: vm
+      index: 50
+
 # Passthrough device inputs
   use_passthrough:
     type: boolean
@@ -658,17 +672,6 @@ inputs:
     required: false
     default: { get_input: serial_port_wrapper }
 
-  additional_disks:
-    type: list
-    hidden: true
-    allow_update: false
-    display_label: Additional Disks
-    description: >
-      List additional disks (references to catalog) to be downloaded
-      before Virtual Machine provisioning
-    required: false
-    default: []
-
   boot_order:
     type: list
     item_type: string
@@ -787,3 +790,40 @@ data_types:
         type: string
         required: false
         description: VM IP, only needed when static IP is defined for the VM
+  additional_disks:
+    properties:
+      name:
+        type: string
+        required: true
+        default: 'vdisk2'
+        description: Unique name to identify the virtual disk.
+        display:
+          index: 1
+          display_name: Name
+      disk:
+        type: string
+        required: true
+        default: '/Datastore0'
+        description: The datastore where the virtual disk will be created.
+        display:
+          index: 2
+          display_name: Disk Path
+      storage:
+        type: integer
+        required: true
+        default: 16
+        description: The size of the virtual disk, specified as an integer value.
+        display:
+          index: 3
+          display_name: Storage Size
+      storage_unit:
+        type: string
+        required: true
+        default: 'GB'
+        description: The unit of measurement for the disk size. Supported values
+          [KB,MB,GB,TB,PB,EB,ZB,YB].
+        display:
+          index: 4
+          display_name: Storage Unit
+        constraints:
+          - valid_values: [ KB, MB, GB, TB, PB, EB, ZB, YB ]
