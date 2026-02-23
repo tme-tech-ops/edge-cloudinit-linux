@@ -1,4 +1,4 @@
-tosca_definitions_version: dell_1_0
+tosca_definitions_version: dell_1_1
 
 imports:
   - dell/types/types.yaml
