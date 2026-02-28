@@ -190,6 +190,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: vm/scripts/get_vm_info.sh
+            hide_output: ["stdout"]
             fabric_env:
               host_string:
                 get_attribute: [vm, vm_details, name]
@@ -210,6 +211,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: vm/scripts/get_vm_info.sh
+            hide_output: ["stdout"]
             fabric_env:
               host_string:
                 get_attribute: [vm, vm_details, name]
