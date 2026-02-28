@@ -742,7 +742,7 @@ data_types:
         default: ''
         description: >
           Destination subnet in CIDR for static route (e.g. 10.20.0.0/16).
-          Required when Use Gateway is true. Do NOT use 0.0.0.0/0 —
+          Required when Use Gateway is true. Do NOT use 0.0.0.0/0 --
           only the primary NIC should have a default route.
         display:
           index: 7
