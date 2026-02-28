@@ -23,9 +23,11 @@ for idx, nic in enumerate(additional_nics_raw):
     nic_config = {
         'interface': f'enp{idx + 2}s0',
         'use_dhcp': nic.get('use_dhcp', True),
+        'accept_dhcp_routes': nic.get('accept_dhcp_routes', False),
         'static_ip': nic.get('static_ip', ''),
         'use_gateway': nic.get('use_gateway', False),
         'gateway': nic.get('gateway', ''),
+        'route_destination': nic.get('route_destination', ''),
         'use_dns': nic.get('use_dns', False),
         'dns': [],
     }
@@ -38,11 +40,27 @@ for idx, nic in enumerate(additional_nics_raw):
     elif isinstance(dns_raw, list):
         nic_config['dns'] = dns_raw
 
+    iface = f'enp{idx + 2}s0'
+    nic_label = f'Additional NIC {idx + 1} ({iface})'
+
     # Validate: if not DHCP, static_ip is required
     if not nic_config['use_dhcp'] and not nic_config['static_ip']:
         raise NonRecoverableError(
-            f'Additional NIC {idx + 1} (enp{idx + 2}s0): '
-            f'if DHCP not used, static_ip must be provided.')
+            f'{nic_label}: if DHCP not used, static_ip must be provided.')
+
+    # Validate: if use_gateway, route_destination and gateway are required
+    if nic_config['use_gateway']:
+        if not nic_config['gateway']:
+            raise NonRecoverableError(
+                f'{nic_label}: gateway is required when use_gateway is true.')
+        if not nic_config['route_destination']:
+            raise NonRecoverableError(
+                f'{nic_label}: route_destination is required when '
+                f'use_gateway is true (e.g. 10.20.0.0/16).')
+        if nic_config['route_destination'] == '0.0.0.0/0':
+            raise NonRecoverableError(
+                f'{nic_label}: route_destination cannot be 0.0.0.0/0. '
+                f'Only the primary NIC should have a default route.')
 
     additional_nics.append(nic_config)
 

@@ -697,6 +697,17 @@ data_types:
         display:
           index: 2
           display_name: Use DHCP
+      accept_dhcp_routes:
+        type: boolean
+        required: false
+        default: false
+        description: >
+          When DHCP is enabled, accept gateway and routes from the DHCP server.
+          Default is false (only the primary NIC's DHCP gateway is used).
+          Enable only if this NIC's DHCP-offered routes are needed.
+        display:
+          index: 3
+          display_name: Accept DHCP Routes
       static_ip:
         type: string
         required: false
@@ -705,15 +716,17 @@ data_types:
           Static IP Address and CIDR prefix (e.g. 192.168.0.100/24).
           Required when Use DHCP is false.
         display:
-          index: 3
+          index: 4
           display_name: Static IP/CIDR
       use_gateway:
         type: boolean
         required: false
         default: false
-        description: Configure a gateway for this NIC.
+        description: >
+          Configure a static route for this NIC.
+          Requires gateway and route_destination when enabled.
         display:
-          index: 4
+          index: 5
           display_name: Use Gateway
       gateway:
         type: string
@@ -721,15 +734,26 @@ data_types:
         default: ''
         description: Gateway IP address (e.g. 192.168.0.1).
         display:
-          index: 5
+          index: 6
           display_name: Gateway IP
+      route_destination:
+        type: string
+        required: false
+        default: ''
+        description: >
+          Destination subnet in CIDR for static route (e.g. 10.20.0.0/16).
+          Required when Use Gateway is true. Do NOT use 0.0.0.0/0 —
+          only the primary NIC should have a default route.
+        display:
+          index: 7
+          display_name: Route Destination (CIDR)
       use_dns:
         type: boolean
         required: false
         default: false
         description: Configure DNS servers for this NIC.
         display:
-          index: 6
+          index: 8
           display_name: Use DNS
       dns:
         type: string
@@ -738,7 +762,7 @@ data_types:
         description: >
           Comma-separated list of DNS server IPs (e.g. 8.8.8.8,8.8.4.4).
         display:
-          index: 7
+          index: 9
           display_name: DNS Servers
       use_nat:
         type: boolean
@@ -746,7 +770,7 @@ data_types:
         default: false
         description: Enable NAT port forwarding for this NIC.
         display:
-          index: 8
+          index: 10
           display_name: Enable NAT
       port_forward_rules:
         type: string
@@ -756,7 +780,7 @@ data_types:
           JSON-formatted port forwarding rules as a string.
           Example: [{"host_ip":"10.0.0.1","vm_port":"22","protocol":"TCP","host_port":"9999","service_type":"SSH"}]
         display:
-          index: 9
+          index: 11
           display_name: Port Forward Rules (JSON)
   additional_disks:
     properties:
