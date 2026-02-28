@@ -6,22 +6,68 @@ from nativeedge.exceptions import NonRecoverableError
 
 template = inputs.get("template")
 parameters = inputs.get("parameters")
+
+# Validate primary NIC
 if not parameters.get("use_dhcp"):
     if not parameters.get("gateway"):
-        raise NonRecoverableError('If dhcp not used, gateway must be provided.')
+        raise NonRecoverableError(
+            'Primary NIC: if DHCP not used, gateway must be provided.')
     if not parameters.get("static_ip"):
-        raise NonRecoverableError('If dhcp not used, static_ip must be provided.')
-if parameters.get("add_second_nic"):
-    if not parameters.get("use_dhcp2"):
-        if not parameters.get("static_ip2"):
-            raise NonRecoverableError('If dhcp not used, static_ip must be provided.')
+        raise NonRecoverableError(
+            'Primary NIC: if DHCP not used, static_ip must be provided.')
 
-ctx.logger.debug(f'Generating inputs: {template}, {parameters}')
+# Build additional NIC configs for the template
+additional_nics_raw = parameters.get("additional_nics", [])
+additional_nics = []
+for idx, nic in enumerate(additional_nics_raw):
+    nic_config = {
+        'interface': f'enp{idx + 2}s0',
+        'use_dhcp': nic.get('use_dhcp', True),
+        'static_ip': nic.get('static_ip', ''),
+        'use_gateway': nic.get('use_gateway', False),
+        'gateway': nic.get('gateway', ''),
+        'use_dns': nic.get('use_dns', False),
+        'dns': [],
+    }
+
+    # Parse DNS from comma-separated string or list
+    dns_raw = nic.get('dns', '')
+    if isinstance(dns_raw, str) and dns_raw:
+        nic_config['dns'] = [d.strip() for d in dns_raw.split(',')
+                             if d.strip()]
+    elif isinstance(dns_raw, list):
+        nic_config['dns'] = dns_raw
+
+    # Validate: if not DHCP, static_ip is required
+    if not nic_config['use_dhcp'] and not nic_config['static_ip']:
+        raise NonRecoverableError(
+            f'Additional NIC {idx + 1} (enp{idx + 2}s0): '
+            f'if DHCP not used, static_ip must be provided.')
+
+    additional_nics.append(nic_config)
+
+# Management NIC is always the next interface after all user NICs
+mgmt_interface = f'enp{len(additional_nics) + 2}s0'
+
+# Build template variables
+template_vars = {
+    'use_dhcp': parameters.get('use_dhcp'),
+    'static_ip': parameters.get('static_ip'),
+    'use_gateway': parameters.get('use_gateway'),
+    'gateway': parameters.get('gateway'),
+    'use_dns': parameters.get('use_dns'),
+    'dns': parameters.get('dns'),
+    'additional_nics': additional_nics,
+    'mgmt_interface': mgmt_interface,
+}
+
+ctx.logger.debug(f'Generating netplan config: {template}, {template_vars}')
 
 content = ctx.get_resource_and_render(resource_path=template,
-                                      template_variables=dict(parameters))
+                                      template_variables=template_vars)
 netplan_encoded = base64.b64encode(content)
 
 ctx.instance.runtime_properties['template_resource_config'] = \
     yaml.load(content.decode('utf-8'), Loader=yaml.Loader)
-ctx.instance.runtime_properties['netplan_encoded'] = netplan_encoded.decode('utf-8')
+ctx.instance.runtime_properties['netplan_encoded'] = \
+    netplan_encoded.decode('utf-8')
