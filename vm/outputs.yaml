@@ -12,17 +12,17 @@ capabilities:
     description: Virtual Machine hostname
     value: { get_input: vm_hostname }
 
-  vm_ip:
+  vm_primary_ip:
     description: Primary NIC IP
     value:
       get_attribute: [ vm_info, capabilities, vm_public_ip ]
 
-  additional_nics_ips:
+  additional_nics:
     description: Additional NIC IPs as [interface:ip, ...] or N/A if none configured
     value:
       get_attribute: [ vm_info, capabilities, additional_nics_ips ]
 
-  tap_ip:
+  tap_interface:
     description: Management (tap) interface IP
     value:
       get_attribute: [ vm_info, capabilities, tap_ip ]
@@ -37,6 +37,10 @@ capabilities:
       concat:
         - get_attribute: [ ssh_keys, secret_key_name ]
         - "_private"
+  
+  vm_password_secret:
+    description: Virtual Machine Password
+    value: { get_secret: { get_input: vm_password } }
 
 # Enable this to display default NAT/Host Network IP
   # endpoint_NAT_ip:

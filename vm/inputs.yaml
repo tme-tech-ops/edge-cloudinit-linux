@@ -19,6 +19,18 @@ inputs:
       index: 10
 
 # VM Host inputs
+
+  vm_name:
+    type: string
+    hidden: false
+    display_label: VM Name
+    description: |
+      Name of the Virtual Machine
+    default: edge-cloud-init-01
+    display:
+      group: vm
+      index: 5
+
   vm_hostname:
     type: string
     hidden: false

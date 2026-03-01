@@ -139,7 +139,7 @@ node_templates:
     properties:
       vm_config:
         location: { get_environment_capability: ece_service_tag }
-        name: { get_sys: [deployment, name ] }
+        name: { get_input: vm_name }
         image: { get_attribute: [binary_image, binary_details, extra, artifact_id] }
         os_type: { get_input: os_type }
         resource_constraints:

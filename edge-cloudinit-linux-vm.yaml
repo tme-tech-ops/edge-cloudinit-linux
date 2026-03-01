@@ -22,6 +22,7 @@ input_groups:
     collapsible: true
     index: 1
     inputs:
+      - vm_name
       - os_type
       - vm_hostname
       - vm_user_name
