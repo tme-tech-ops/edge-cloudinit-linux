@@ -22,6 +22,7 @@ input_groups:
     collapsible: true
     index: 1
     inputs:
+      - vm_name
       - os_type
       - vm_hostname
       - vm_user_name
@@ -65,14 +66,7 @@ input_groups:
       - dns
       - use_nat
       - port_forward_rules
-      - add_second_nic
-      - vnic_1_segment_name
-      - use_dhcp2
-      - static_ip2
-      - use_dns2
-      - dns2
-      - use_nat2
-      - port_forward_rules2
+      - additional_nics
 
 
 labels:

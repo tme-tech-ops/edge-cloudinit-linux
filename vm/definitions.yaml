@@ -55,12 +55,9 @@ node_templates:
             vm/scripts/prepare_network_settings.py
           executor: central_deployment_agent
           inputs:
-            network_segments:
-              - { get_input: vnic_0_segment_name }
-              - { get_input: vnic_1_segment_name }
-            port_forwards:
-              - { get_input: port_forward_rules }
-              - { get_input: port_forward_rules2 }
+            primary_segment: { get_input: vnic_0_segment_name }
+            primary_port_forwards: { get_input: port_forward_rules }
+            additional_nics: { get_input: additional_nics }
         create:
           implementation: vm/scripts/prepare_serial_ports.py
           executor: central_deployment_agent
@@ -124,11 +121,7 @@ node_templates:
               gateway: { get_input: gateway }
               use_dns: { get_input: use_dns }
               dns: { get_input: dns }
-              add_second_nic: { get_input: add_second_nic }
-              use_dhcp2: { get_input: use_dhcp2 }
-              static_ip2: { get_input: static_ip2 }
-              use_dns2: { get_input: use_dns2 }
-              dns2: { get_input: dns2 }
+              additional_nics: { get_input: additional_nics }
         create:
           inputs:
             resource_config:
@@ -146,7 +139,7 @@ node_templates:
     properties:
       vm_config:
         location: { get_environment_capability: ece_service_tag }
-        name: { get_sys: [deployment, name ] }
+        name: { get_input: vm_name }
         image: { get_attribute: [binary_image, binary_details, extra, artifact_id] }
         os_type: { get_input: os_type }
         resource_constraints:
