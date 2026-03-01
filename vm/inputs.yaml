@@ -172,11 +172,11 @@ inputs:
 
   disk_wrapper:
     type: string
-    display_label: Endpoint Datastore Path
+    display_label: Endpoint DataStore Path
     required: true
     allow_update: false
     description: >
-      Deployment datastore path on target Endpoint.
+      Deployment datastore path on target Endpoint. (i.e. /DataStore0)
     constraints:
       - valid_values:
           jmespath:
@@ -384,7 +384,7 @@ inputs:
     type: string
     hidden: false
     allow_update: true
-    display_label: Virtual Network Segment name for Management Interface
+    display_label: Virtual Network Segment name for Primary Interface
     description: Name of the Virtual Network Segment.
     constraints:
     - valid_values:
@@ -411,9 +411,9 @@ inputs:
     type: string
     hidden: false
     exclusive_with: use_dhcp
-    display_label: Static IP and CIDR prefix
+    display_label: Static IP in CIDR notation
     description: |
-      Static IP Address and CIDR that will be assigned to the VM 
+      Static IP Address in CIDR notation that will be assigned to the VM 
       Example: 192.168.0.100/24
     constraints:
     - pattern: '^(?:((25[0-5]|2[0-4]\d|1\d\d|\d{1,2})(\.(25[0-5]|2[0-4]\d|1\d\d|\d{1,2})){3})\/(3[0-2]|[12]?\d)|)$'
@@ -482,7 +482,7 @@ inputs:
     hidden: false
     display_label: Enable NAT Port Forwarding
     description: |
-      Uncheck to define NAT Port Forwarding rules when required
+      Enable to define NAT Port Forwarding rules (Only use with NAT Segment)
     default: false
     display:
       group: network
@@ -694,9 +694,9 @@ data_types:
       nic_name:
         type: string
         required: true
-        default: ''
+        default: 'nic2'
         description: >
-          A unique label for this NIC entry (e.g. "Data NIC 1").
+          A unique label for this NIC entry (e.g. "NIC 2").
           Used to identify each NIC in the configuration list.
         display:
           index: 1
@@ -818,7 +818,7 @@ data_types:
         type: string
         required: true
         default: '/Datastore0'
-        description: The datastore where the virtual disk will be created.
+        description: The /DataStore path where the virtual disk will be created.
         display:
           index: 2
           display_name: Disk Path
