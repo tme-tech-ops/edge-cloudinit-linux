@@ -68,7 +68,6 @@ input_groups:
       - port_forward_rules
       - additional_nics
 
-
 labels:
   csys-obj-type:
     values:
