@@ -2,7 +2,7 @@ inputs:
 
 ### User Defined Inputs ###
 
-# Artifact inputs 
+# Deployment Artifact 
   edge_os_image_secret:
     type: secret_key
     hidden: false
@@ -16,71 +16,7 @@ inputs:
     - type: binary_configuration
     display:
       group: artifacts
-      index: 10
-
-# VM Host inputs
-
-  vm_name:
-    type: string
-    hidden: false
-    display_label: VM Name
-    description: |
-      Name of the Virtual Machine
-    default: edge-cloud-init-01
-    display:
-      group: vm
-      index: 5
-
-  vm_hostname:
-    type: string
-    hidden: false
-    display_label: VM Hostname
-    description: |
-      Hostname of the Virtual Machine
-      Cannot contain characters other than:
-      letters (a-z, A-Z), numbers (0-9), or hyphens (-).
-      Can be up to 63 characters long.
-    constraints:
-    - pattern: ^(?!-)[a-zA-Z0-9-]{1,63}(?<!-)$
-      error_message: |
-        Must be letters (a-z, A-Z), numbers (0-9), or hyphens (-).
-        No more than 64 characters.
-    - max_length: 64
-    default: edgehost
-    display:
-      group: vm
-      index: 10
-
-  vm_user_name:
-    type: string
-    hidden: false
-    allow_update: false
-    display_label: VM Username
-    description: |
-      Username to be used for the virtual machine.
-      Cannot contain leading or trailing spaces.
-    default: edgeuser
-    constraints:
-    - pattern: ^(?!\s)(?!.*\s$).*$
-      error_message: Cannot contain leading or trailing spaces.
-    display:
-      group: vm
-      index: 20
-  
-  vm_password:
-    type: secret_key
-    hidden: false
-    display_label: VM Password
-    description: |
-      Secret key containing the virtual machine username password in SHA-512.
-      See example secret in the blueprint zip for details.
-    constraints:
-    - type: password
-    display:
-      group: vm
-      index: 30
-  
-# Resource inputs
+      index: 1
 
   os_type:
     type: string
@@ -102,8 +38,72 @@ inputs:
         - "SUSE-SLES15"
         - "LINUX-OTHER"
     display:
+      group: artifacts
+      index: 5
+
+# NativeEdge Virtual Machine
+
+  vm_name:
+    type: string
+    hidden: false
+    display_label: VM Name
+    description: |
+      Name of the Virtual Machine
+    default: edge-cloud-init-01
+    display:
+      group: vm
+      index: 1
+
+  vm_hostname:
+    type: string
+    hidden: false
+    display_label: VM Hostname
+    description: |
+      Hostname of the Virtual Machine
+      Cannot contain characters other than:
+      letters (a-z, A-Z), numbers (0-9), or hyphens (-).
+      Can be up to 63 characters long.
+    constraints:
+    - pattern: ^(?!-)[a-zA-Z0-9-]{1,63}(?<!-)$
+      error_message: |
+        Must be letters (a-z, A-Z), numbers (0-9), or hyphens (-).
+        No more than 64 characters.
+    - max_length: 64
+    default: edgehost
+    display:
       group: vm
       index: 5
+
+  vm_user_name:
+    type: string
+    hidden: false
+    allow_update: false
+    display_label: VM Username
+    description: |
+      Username to be used for the virtual machine.
+      Cannot contain leading or trailing spaces.
+    default: edgeuser
+    constraints:
+    - pattern: ^(?!\s)(?!.*\s$).*$
+      error_message: Cannot contain leading or trailing spaces.
+    display:
+      group: vm
+      index: 10
+  
+  vm_password:
+    type: secret_key
+    hidden: false
+    display_label: VM Password
+    description: |
+      Secret key containing the virtual machine username password in SHA-512.
+      See example secret in the blueprint zip for details.
+    constraints:
+    - type: password
+    display:
+      group: vm
+      index: 15
+  
+# Resource inputs
 
   vcpus:
     type: integer
@@ -116,7 +116,7 @@ inputs:
     - greater_or_equal: 2
     display:
       group: vm
-      index: 10
+      index: 20
 
   memory_size:
     type: string
@@ -133,7 +133,24 @@ inputs:
         Example: 4GB
     display:
       group: vm
-      index: 20
+      index: 25
+
+  disk_wrapper:
+    type: string
+    display_label: Endpoint DataStore Path
+    required: true
+    allow_update: false
+    description: >
+      Deployment datastore path on target Endpoint. (i.e. /DataStore0)
+    constraints:
+      - valid_values:
+          jmespath:
+            - extra.hw_core.storage.dataStoreOrVolumes[?((((type=='SSD'||type=='HDD')&&name.contains(@,'DataStore'))||(shared&&name=='/Shared_DataStore'))&&status=='ONLINE')].mountPath
+            - get_inventory:
+                get_environment_capability: ece_service_tag
+    display:
+      group: vm
+      index: 30
 
   os_disk_size:
     type: string
@@ -151,7 +168,7 @@ inputs:
         Example: 50GB
     display:
       group: vm
-      index: 30
+      index: 35
 
   disk_controller:
     type: string
@@ -168,30 +185,26 @@ inputs:
           - 'SCSI'
     display:
       group: vm
-      index: 35
+      index: 40
 
-  disk_wrapper:
-    type: string
-    display_label: Endpoint DataStore Path
-    required: true
+  add_disks:
+    type: boolean
+    hidden: false
     allow_update: false
-    description: >
-      Deployment datastore path on target Endpoint. (i.e. /DataStore0)
-    constraints:
-      - valid_values:
-          jmespath:
-            - extra.hw_core.storage.dataStoreOrVolumes[?((((type=='SSD'||type=='HDD')&&name.contains(@,'DataStore'))||(shared&&name=='/Shared_DataStore'))&&status=='ONLINE')].mountPath
-            - get_inventory:
-                get_environment_capability: ece_service_tag
+    display_label: Add Disks
+    description: |
+      Check to add a list of additional disks
+    default: false
     display:
       group: vm
-      index: 40
+      index: 45
 
   additional_disks:
     type: list
     item_type: additional_disks
     hidden: false
     allow_update: false
+    only_with: add_disks
     display_label: Optional list of additional Virtual Disks
     description: >
       List of additional virtual disks to be created.
@@ -199,7 +212,7 @@ inputs:
     default: []
     display:
       group: vm
-      index: 50
+      index: 45
 
 # Advanced Boot Options
 
@@ -394,7 +407,7 @@ inputs:
             get_environment_capability: ece_service_tag
     display:
       group: network
-      index: 10
+      index: 1
 
   use_dhcp:
     type: boolean
@@ -405,7 +418,7 @@ inputs:
     default: true
     display:
       group: network
-      index: 20
+      index: 5
 
   static_ip:
     type: string
@@ -423,7 +436,7 @@ inputs:
     required: false
     display:
       group: network
-      index: 30
+      index: 10
 
   use_gateway:
     type: boolean
@@ -435,7 +448,7 @@ inputs:
     default: false
     display:
       group: network
-      index: 40
+      index: 15
 
   gateway:
     type: string
@@ -451,7 +464,7 @@ inputs:
         Example: 172.16.0.1
     display:
       group: network
-      index: 50
+      index: 20
 
   use_dns:
     type: boolean
@@ -463,7 +476,7 @@ inputs:
     default: false
     display:
       group: network
-      index: 60
+      index: 25
 
   dns:
     type: list
@@ -475,7 +488,7 @@ inputs:
     default: []
     display:
       group: network
-      index: 70
+      index: 30
  
   use_nat:
     type: boolean
@@ -486,7 +499,7 @@ inputs:
     default: false
     display:
       group: network
-      index: 80
+      index: 35
 
   port_forward_rules:
     type: list
@@ -501,13 +514,25 @@ inputs:
     default: []
     display:
       group: network
-      index: 90
+      index: 40
+
+  add_nics:
+    type: boolean
+    hidden: false
+    display_label: Add Network Interfaces
+    description: |
+      Check to add list of additional network interfaces
+    default: false
+    display:
+      group: network
+      index: 45
 
   additional_nics:
     type: list
     item_type: additional_nics
     hidden: false
     allow_update: false
+    only_with: add_nics
     display_label: Additional Network Interfaces
     description: >
       List of additional NICs (up to 9) beyond the primary NIC.
@@ -516,7 +541,7 @@ inputs:
     default: []
     display:
       group: network
-      index: 100
+      index: 50
 
 ### Hidden inputs ###
 

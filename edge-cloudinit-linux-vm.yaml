@@ -17,13 +17,13 @@ input_groups:
     index: 0
     inputs:
       - edge_os_image_secret
+      - os_type
   vm:
     display_label: NativeEdge Virtual Machine
     collapsible: true
     index: 1
     inputs:
       - vm_name
-      - os_type
       - vm_hostname
       - vm_user_name
       - vm_password
@@ -32,30 +32,12 @@ input_groups:
       - os_disk_size
       - disk_controller
       - disk_wrapper
+      - add_disks
       - additional_disks
-  adv_boot:
-    display_label: Advanced Boot Options
-    collapsible: true
-    index: 2
-    inputs:
-      - hardware_options.vTPM
-      - hardware_options.secure_boot
-      - hardware_options.firmware_type
-  device_passthrough:
-    display_label: Device Passthrough
-    collapsible: true
-    index: 3
-    inputs:
-      - use_passthrough
-      - pcie
-      - usb
-      - serial_port_wrapper
-      - gpu
-      - video
   network:
     display_label: Network Configuration
     collapsible: true
-    index: 4
+    index: 2
     inputs:
       - vnic_0_segment_name
       - use_dhcp
@@ -66,7 +48,27 @@ input_groups:
       - dns
       - use_nat
       - port_forward_rules
+      - add_nics
       - additional_nics
+  adv_boot:
+    display_label: Advanced Boot Options
+    collapsible: true
+    index: 3
+    inputs:
+      - hardware_options.vTPM
+      - hardware_options.secure_boot
+      - hardware_options.firmware_type
+  device_passthrough:
+    display_label: Device Passthrough
+    collapsible: true
+    index: 4
+    inputs:
+      - use_passthrough
+      - pcie
+      - usb
+      - serial_port_wrapper
+      - gpu
+      - video
 
 labels:
   csys-obj-type:
