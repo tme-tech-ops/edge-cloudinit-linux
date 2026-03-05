@@ -269,7 +269,7 @@ inputs:
       group: device_passthrough
       index: 10
 
-  usb:
+  usb_wrapper:
     type: list
     item_type: string
     hidden: false
@@ -312,7 +312,7 @@ inputs:
       group: device_passthrough
       index: 30
 
-  gpu:
+  gpu_wrapper:
     type: list
     item_type: string
     hidden: false
@@ -372,7 +372,7 @@ inputs:
   #     group: device_passthrough
   #     index: 50
 
-  pcie:
+  pcie_wrapper:
     type: list
     item_type: string
     display_label: PCIe Passthrough
@@ -546,6 +546,48 @@ inputs:
 ### Hidden inputs ###
 
 # Hidden VM
+
+  usb:
+    type: list
+    item_type: string
+    hidden: true
+    allow_update: false
+    display_label: USB Device list
+    description: >
+      A list of USB logical names (string). USB-1 to USB-10 for Passthrough.
+    required: false
+    default: {  get_input: usb_wrapper }
+
+  gpu:
+    type: list
+    item_type: string
+    hidden: true
+    allow_update: false
+    display_label: GPU Passthrough
+    description: >
+      GPU passthrough. A list of GPU logical names (string). NVIDIA_A2-Slot1 to
+      NVIDIA_A2-Slot8, NVIDIA_A30-Slot1 to NVIDIA_A30-Slot8
+    required: false
+    default: { get_input: gpu_wrapper }
+
+  pcie:
+    type: list
+    item_type: string
+    display_label: PCIe Passthrough
+    hidden: true
+    allow_update: false
+    description: >
+      PCIe passthrough. A list of PCIe logical names.
+    required: false
+    default: { get_input: pcie_wrapper }
+
+  segment_name:
+    type: string
+    hidden: true
+    allow_update: false
+    display_label: Virtual Network Segment name for Primary Interface
+    description: Name of the Virtual Network Segment.
+    default: { get_input: vnic_0_segment_name }
 
   disk:
     type: string

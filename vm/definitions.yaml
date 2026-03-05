@@ -72,7 +72,7 @@ node_templates:
             vm/scripts/prepare_network_settings.py
           executor: central_deployment_agent
           inputs:
-            primary_segment: { get_input: vnic_0_segment_name }
+            primary_segment: { get_input: segment_name }
             primary_port_forwards: { get_input: port_forward_rules }
             additional_nics: { get_input: additional_nics }
         create:
