@@ -138,7 +138,7 @@ inputs:
   disk_wrapper:
     type: string
     display_label: Endpoint DataStore Path
-    required: true
+    required: false
     allow_update: false
     description: >
       Deployment datastore path on target Endpoint. (i.e. /DataStore0)
@@ -397,6 +397,7 @@ inputs:
     type: string
     hidden: false
     allow_update: true
+    required: false
     display_label: Virtual Network Segment name for Primary Interface
     description: Name of the Virtual Network Segment.
     constraints:
@@ -585,6 +586,7 @@ inputs:
     type: string
     hidden: true
     allow_update: false
+    required: true
     display_label: Virtual Network Segment name for Primary Interface
     description: Name of the Virtual Network Segment.
     default: { get_input: vnic_0_segment_name }
@@ -594,6 +596,7 @@ inputs:
     display_label: Endpoint Datastore Path
     allow_update: false
     hidden: true
+    required: true
     description: >
       Deployment datastore path on target Endpoint.
       Available datastores can be retrieved from inventory service
