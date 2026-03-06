@@ -138,7 +138,7 @@ inputs:
   disk_wrapper:
     type: string
     display_label: Endpoint DataStore Path
-    required: false
+    required: true
     allow_update: false
     description: >
       Deployment datastore path on target Endpoint. (i.e. /DataStore0)
@@ -397,7 +397,7 @@ inputs:
     type: string
     hidden: false
     allow_update: true
-    required: false
+    required: true
     display_label: Virtual Network Segment name for Primary Interface
     description: Name of the Virtual Network Segment.
     constraints:
