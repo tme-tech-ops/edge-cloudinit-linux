@@ -2,7 +2,7 @@ inputs:
 
 ### User Defined Inputs ###
 
-# Deployment Artifact 
+## Deployment Artifact 
   edge_os_image_secret:
     type: secret_key
     hidden: false
@@ -11,7 +11,6 @@ inputs:
     description: |
       Secret containing url, username, access_token, and 
       version of the os image.
-      See example secret in the blueprint zip.
     constraints:
     - type: binary_configuration
     display:
@@ -41,7 +40,7 @@ inputs:
       group: artifacts
       index: 5
 
-# NativeEdge Virtual Machine
+## Virtual Machine Configuration
 
   vm_name:
     type: string
@@ -214,7 +213,159 @@ inputs:
       group: vm
       index: 45
 
-# Advanced Boot Options
+# Network inputs
+  vnic_0_segment_name:
+    type: string
+    hidden: false
+    allow_update: true
+    required: true
+    display_label: Virtual Network Segment name for Primary Interface
+    description: Name of the Virtual Network Segment.
+    constraints:
+    - valid_values:
+        jmespath:
+        - extra.hw_core.network.virtualSegment[?type=='NAT'||type=='BRIDGE'].name
+        - get_inventory:
+            get_environment_capability: ece_service_tag
+    display:
+      group: vm
+      index: 50
+
+  use_dhcp:
+    type: boolean
+    hidden: false
+    display_label: Use DHCP
+    description: |
+      If false, then static ip must be configured with optional DNS and Gateway.
+    default: true
+    display:
+      group: vm
+      index: 55
+
+  static_ip:
+    type: string
+    hidden: false
+    exclusive_with: use_dhcp
+    display_label: Static IP in CIDR notation
+    description: |
+      Static IP Address in CIDR notation that will be assigned to the VM 
+      Example: 192.168.0.100/24
+    constraints:
+    - pattern: '^(?:((25[0-5]|2[0-4]\d|1\d\d|\d{1,2})(\.(25[0-5]|2[0-4]\d|1\d\d|\d{1,2})){3})\/(3[0-2]|[12]?\d)|)$'
+      error_message: |
+        Invalid format for IP Address in CIDR format.
+        Example: 172.16.0.1/16
+    required: false
+    display:
+      group: vm
+      index: 60
+
+  use_gateway:
+    type: boolean
+    hidden: false
+    exclusive_with: use_dhcp
+    display_label: Use Gateway
+    description: |
+      If false, Gateway will not be configured
+    default: false
+    display:
+      group: vm
+      index: 65
+
+  gateway:
+    type: string
+    hidden: false
+    only_with: use_gateway
+    display_label: Gateway IP
+    description: IP address of the default gateway.
+    required: false
+    constraints:
+    - pattern: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$|^$
+      error_message: |
+        Invalid format for IP Address.
+        Example: 172.16.0.1
+    display:
+      group: vm
+      index: 70
+
+  use_dns:
+    type: boolean
+    hidden: false
+    exclusive_with: use_dhcp
+    display_label: Use DNS
+    description: |
+      If false, DNS will not be configured
+    default: false
+    display:
+      group: vm
+      index: 75
+
+  dns:
+    type: list
+    hidden: false
+    only_with: use_dns
+    display_label: DNS Servers
+    description: List of DNS servers to use.
+    required: false
+    default: []
+    display:
+      group: vm
+      index: 80
+ 
+  use_nat:
+    type: boolean
+    hidden: false
+    display_label: Enable NAT Port Forwarding
+    description: |
+      Enable to define NAT Port Forwarding rules (Only use with NAT Segment)
+    default: false
+    display:
+      group: vm
+      index: 85
+
+  port_forward_rules:
+    type: list
+    hidden: false
+    only_with: use_nat
+    item_type: port_forward_rules
+    description: |
+      Leave vm_ip blank and fill in host_ip, vm_port, protocol, host_port, and service_type
+      Example for SSH: {host_ip:IP_OF_NAT Interface,vm_port:22,protocol:TCP,host_port:9999,service_type:SSH} 
+    required: false
+    display_label: Port Mapping
+    default: []
+    display:
+      group: vm
+      index: 90
+
+  add_nics:
+    type: boolean
+    hidden: false
+    display_label: Add Network Interfaces
+    description: |
+      Check to add list of additional network interfaces
+    default: false
+    display:
+      group: vm
+      index: 95
+
+  additional_nics:
+    type: list
+    item_type: additional_nics
+    hidden: false
+    allow_update: false
+    only_with: add_nics
+    display_label: Additional Network Interfaces
+    description: >
+      List of additional NICs (up to 9) beyond the primary NIC.
+      Each NIC requires a segment name and network configuration.
+    required: false
+    default: []
+    display:
+      group: vm
+      index: 100
+
+## Advanced Options
 
   hardware_options.secure_boot:
     type: boolean
@@ -226,8 +377,8 @@ inputs:
       Enable secure boot.
     default: false
     display:
-      group: adv_boot
-      index: 10
+      group: adv_opt
+      index: 1
 
   hardware_options.firmware_type:
     type: string
@@ -240,8 +391,8 @@ inputs:
     constraints:
       - valid_values: [BIOS, UEFI]
     display:
-      group: adv_boot
-      index: 20
+      group: adv_opt
+      index: 5
 
   hardware_options.vTPM:
     type: boolean
@@ -254,8 +405,8 @@ inputs:
       Typically required for Secure Boot.
     default: false
     display:
-      group: adv_boot
-      index: 30
+      group: adv_opt
+      index: 10
 
 # Passthrough device inputs
   use_passthrough:
@@ -266,8 +417,8 @@ inputs:
       Uncheck to define usb, serial, gpu, video, and pcie devices for VM passthrough
     default: false
     display:
-      group: device_passthrough
-      index: 10
+      group: adv_opt
+      index: 15
 
   usb_wrapper:
     type: list
@@ -287,7 +438,7 @@ inputs:
             get_environment_capability: ece_service_tag
     default: []
     display:
-      group: device_passthrough
+      group: adv_opt
       index: 20
 
   serial_port_wrapper:
@@ -309,8 +460,8 @@ inputs:
             - get_inventory:
                 get_environment_capability: ece_service_tag
     display:
-      group: device_passthrough
-      index: 30
+      group: adv_opt
+      index: 25
 
   gpu_wrapper:
     type: list
@@ -330,8 +481,8 @@ inputs:
             get_environment_capability: ece_service_tag
     default: []
     display:
-      group: device_passthrough
-      index: 40
+      group: adv_opt
+      index: 30
 
   video:
     type: list
@@ -348,8 +499,8 @@ inputs:
         - "onboard controller"
     default: []
     display:
-      group: device_passthrough
-      index: 50
+      group: adv_opt
+      index: 35
 
   # video: # CANNOT Use jmespath for video controllers, keeping for reference
   #   type: list
@@ -369,8 +520,8 @@ inputs:
   #           get_environment_capability: ece_service_tag
   #   default: []
   #   display:
-  #     group: device_passthrough
-  #     index: 50
+  #     group: adv_opt
+  #     index: 36
 
   pcie_wrapper:
     type: list
@@ -389,160 +540,8 @@ inputs:
             get_environment_capability: ece_service_tag
     default: []
     display:
-      group: device_passthrough
-      index: 60
-
-# Network inputs
-  vnic_0_segment_name:
-    type: string
-    hidden: false
-    allow_update: true
-    required: true
-    display_label: Virtual Network Segment name for Primary Interface
-    description: Name of the Virtual Network Segment.
-    constraints:
-    - valid_values:
-        jmespath:
-        - extra.hw_core.network.virtualSegment[?type=='NAT'||type=='BRIDGE'].name
-        - get_inventory:
-            get_environment_capability: ece_service_tag
-    display:
-      group: network
-      index: 1
-
-  use_dhcp:
-    type: boolean
-    hidden: false
-    display_label: Use DHCP
-    description: |
-      If false, then static ip must be configured with optional DNS and Gateway.
-    default: true
-    display:
-      group: network
-      index: 5
-
-  static_ip:
-    type: string
-    hidden: false
-    exclusive_with: use_dhcp
-    display_label: Static IP in CIDR notation
-    description: |
-      Static IP Address in CIDR notation that will be assigned to the VM 
-      Example: 192.168.0.100/24
-    constraints:
-    - pattern: '^(?:((25[0-5]|2[0-4]\d|1\d\d|\d{1,2})(\.(25[0-5]|2[0-4]\d|1\d\d|\d{1,2})){3})\/(3[0-2]|[12]?\d)|)$'
-      error_message: |
-        Invalid format for IP Address in CIDR format.
-        Example: 172.16.0.1/16
-    required: false
-    display:
-      group: network
-      index: 10
-
-  use_gateway:
-    type: boolean
-    hidden: false
-    exclusive_with: use_dhcp
-    display_label: Use Gateway
-    description: |
-      If false, Gateway will not be configured
-    default: false
-    display:
-      group: network
-      index: 15
-
-  gateway:
-    type: string
-    hidden: false
-    only_with: use_gateway
-    display_label: Gateway IP
-    description: IP address of the default gateway.
-    required: false
-    constraints:
-    - pattern: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$|^$
-      error_message: |
-        Invalid format for IP Address.
-        Example: 172.16.0.1
-    display:
-      group: network
-      index: 20
-
-  use_dns:
-    type: boolean
-    hidden: false
-    exclusive_with: use_dhcp
-    display_label: Use DNS
-    description: |
-      If false, DNS will not be configured
-    default: false
-    display:
-      group: network
-      index: 25
-
-  dns:
-    type: list
-    hidden: false
-    only_with: use_dns
-    display_label: DNS Servers
-    description: List of DNS servers to use.
-    required: false
-    default: []
-    display:
-      group: network
-      index: 30
- 
-  use_nat:
-    type: boolean
-    hidden: false
-    display_label: Enable NAT Port Forwarding
-    description: |
-      Enable to define NAT Port Forwarding rules (Only use with NAT Segment)
-    default: false
-    display:
-      group: network
-      index: 35
-
-  port_forward_rules:
-    type: list
-    hidden: false
-    only_with: use_nat
-    item_type: port_forward_rules
-    description: |
-      Leave vm_ip blank and fill in host_ip, vm_port, protocol, host_port, and service_type
-      Example for SSH: {host_ip:IP_OF_NAT Interface,vm_port:22,protocol:TCP,host_port:9999,service_type:SSH} 
-    required: false
-    display_label: Port Mapping
-    default: []
-    display:
-      group: network
+      group: adv_opt
       index: 40
-
-  add_nics:
-    type: boolean
-    hidden: false
-    display_label: Add Network Interfaces
-    description: |
-      Check to add list of additional network interfaces
-    default: false
-    display:
-      group: network
-      index: 45
-
-  additional_nics:
-    type: list
-    item_type: additional_nics
-    hidden: false
-    allow_update: false
-    only_with: add_nics
-    display_label: Additional Network Interfaces
-    description: >
-      List of additional NICs (up to 9) beyond the primary NIC.
-      Each NIC requires a segment name and network configuration.
-    required: false
-    default: []
-    display:
-      group: network
-      index: 50
 
 ### Hidden inputs ###
 

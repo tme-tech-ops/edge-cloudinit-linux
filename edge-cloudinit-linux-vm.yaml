@@ -19,7 +19,7 @@ input_groups:
       - edge_os_image_secret
       - os_type
   vm:
-    display_label: NativeEdge Virtual Machine
+    display_label: Virtual Machine Configuration
     collapsible: true
     index: 1
     inputs:
@@ -34,11 +34,6 @@ input_groups:
       - disk_wrapper
       - add_disks
       - additional_disks
-  network:
-    display_label: Network Configuration
-    collapsible: true
-    index: 2
-    inputs:
       - vnic_0_segment_name
       - use_dhcp
       - static_ip
@@ -50,19 +45,15 @@ input_groups:
       - port_forward_rules
       - add_nics
       - additional_nics
-  adv_boot:
-    display_label: Advanced Boot Options
+
+  adv_opt:
+    display_label: Advanced Options
     collapsible: true
     index: 3
     inputs:
       - hardware_options.vTPM
       - hardware_options.secure_boot
       - hardware_options.firmware_type
-  device_passthrough:
-    display_label: Device Passthrough
-    collapsible: true
-    index: 4
-    inputs:
       - use_passthrough
       - pcie
       - usb
