@@ -8,6 +8,9 @@ imports:
   - vm/definitions.yaml
   - vm/inputs.yaml
   - vm/outputs.yaml
+  - multi-node/definitions.yaml
+  - multi-node/inputs.yaml
+  - multi-node/outputs.yaml
 
 
 input_groups:
@@ -45,6 +48,16 @@ input_groups:
       - port_forward_rules
       - add_nics
       - additional_nics
+
+  multi_node:
+    display_label: Additional Virtual Machines
+    collapsible: true
+    index: 2
+    inputs:
+      - deploy_additional_vms
+      - child_blueprint_id
+      - additional_server_count
+      - additional_vms
 
   adv_opt:
     display_label: Advanced Options

@@ -1,0 +1,56 @@
+imports:
+  - plugin:edge-plugin
+  - plugin:utilities-plugin?version=>=3.1.3.0
+
+node_templates:
+
+  cloudinit:
+    type: dell.nodes.CloudInit.CloudConfig
+    properties:
+      resource_config: { get_input: cloudinit }
+
+  format_serial_ports:
+    type: dell.nodes.Root
+    interfaces:
+      dell.interfaces.lifecycle:
+        create:
+          implementation: vm/scripts/prepare_serial_ports.py
+          executor: central_deployment_agent
+          inputs:
+            serial_port: { get_input: serial_port }
+
+  vm:
+    type: dell.nodes.nativeedge.template.NativeEdgeVM
+    properties:
+      vm_config:
+        location: { get_input: service_tag }
+        name: { get_input: name }
+        image: { get_input: image }
+        os_type: { get_input: os_type }
+        resource_constraints:
+          cpu: { get_input: cpu }
+          memory: { get_input: memory }
+          storage: { get_input: storage }
+          disk: { get_input: disk }
+          controller: { get_input: disk_controller }
+        hardware_options:
+          vTPM: { get_input: hardware_options.vTPM }
+          secure_boot: { get_input: hardware_options.secure_boot }
+          firmware_type: { get_input: hardware_options.firmware_type }
+        enable_management: { get_input: enable_management }
+        network_settings: { get_input: network_settings }
+        ports:
+          usb: { get_input: usb }
+          serial_port: { get_attribute: [format_serial_ports, serial_ports_list] }
+          gpu: { get_input: gpu }
+          video: { get_input: video }
+          pcie: { get_input: pcie }
+        cloudinit: { get_attribute: [cloudinit, cloud_config] }
+        iso_files: { get_input: iso_files }
+        boot_order: { get_input: boot_order }
+        additional_disks: { get_input: additional_disks }
+    relationships:
+       - type: dell.relationships.depends_on
+         target: cloudinit
+       - type: dell.relationships.depends_on
+         target: format_serial_ports

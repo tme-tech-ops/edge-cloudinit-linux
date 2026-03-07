@@ -1,0 +1,79 @@
+tosca_definitions_version: dell_1_0
+
+description: >
+  Blueprint creates a Virtual Machine on Endpoint using NativeEdge Plugin.
+
+imports:
+  - dell/types/types.yaml
+  # Inputs
+  - vm/inputs.yaml
+  # Outputs
+  - vm/outputs.yaml
+  # Infrastructure - ECE VM
+  - vm/blueprint.yaml
+
+labels:
+  csys-obj-type:
+    values:
+      - environment
+
+blueprint_labels:
+  csys-blueprint-type:
+    values:
+      - utility
+
+  env:
+    values:
+      - NED
+
+input_groups:
+  parent_config:
+    display_label: Target Environment
+    collapsible: false
+    index: 0
+    inputs:
+      - ned_deployment_id
+      - service_tag
+  deployment_config:
+    display_label: Deployment Configuration
+    collapsible: false
+    index: 10
+    inputs:
+      - name
+      - image
+      - os_type
+      - cpu
+      - memory
+      - storage
+      - disk_wrapper
+      - disk_controller
+  network_configuration:
+    display_label: Network Configuration
+    collapsible: false
+    index: 20
+    inputs:
+      - enable_management
+      - segment_name
+      - network_settings
+  devices_configuration:
+    display_label: Devices Configuration
+    collapsible: true
+    index: 30
+    inputs:
+      - usb_wrapper
+      - serial_port_wrapper
+      - gpu_wrapper
+      - video_wrapper
+      - pcie
+      - iso_files
+      - additional_disks
+  advanced_configuration:
+    display_label: Advanced Deployment Configuration
+    collapsible: true
+    index: 40
+    inputs:
+      - hardware_options.vTPM
+      - hardware_options.secure_boot
+      - hardware_options.firmware_type
+      - cloudinit
+      - boot_order

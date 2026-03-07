@@ -1,0 +1,37 @@
+capabilities:
+
+  service_tag:
+    description: Service Tag
+    value: { get_property: [vm, vm_config, location] }
+
+  vm_name_id:
+    description: Virtual Machine Name
+    value: { get_attribute: [vm, vm_details, name] }
+
+  vm_id:
+    description: Virtual Machine ID
+    value: { get_attribute: [vm, vm_details, id] }
+
+  vm_details:
+    description: Virtual Machine Details
+    value: { get_attribute: [vm, vm_details] }
+
+  vm_config:
+    description: Virtual Machine Config
+    value: { get_attribute: [vm, vm_config] }
+
+  vm_hostname:
+    description: Virtual Machine Hostname
+    value: { get_input: vm_hostname }
+
+  vm_user_name:
+    description: Virtual Machine Username
+    value: { get_input: vm_user_name }
+
+  vm_primary_ip:
+    description: Primary NIC IP
+    value: { get_attribute: [vm_info, capabilities, vm_public_ip] }
+
+  tap_ip:
+    description: Management (tap) interface IP
+    value: { get_attribute: [vm_info, capabilities, tap_ip] }

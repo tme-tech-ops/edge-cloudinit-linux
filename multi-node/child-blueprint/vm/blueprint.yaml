@@ -1,0 +1,86 @@
+imports:
+  - plugin:edge-plugin
+  - plugin:utilities-plugin?version=>=3.1.3.0
+  - plugin:fabric-plugin?version=>=3.3.2.0
+
+dsl_definitions:
+
+  get_vm_info: &get_vm_info
+    implementation: fabric.fabric_plugin.tasks.run_script
+    inputs:
+      script_path: vm/scripts/get_vm_info.sh
+      hide_output: ["stdout"]
+      fabric_env:
+        host_string: { get_attribute: [vm, vm_details, name] }
+        user: { get_input: vm_user_name }
+        key: { get_secret: { get_input: ssh_private_key_secret } }
+        port: 22
+      proxy_settings:
+        auto_resolve: false
+        target_id: { get_attribute: [proxy_resolver, _proxy_target_id] }
+        target_ip: { get_attribute: [vm, vm_details, name] }
+
+node_templates:
+
+  cloudinit:
+    type: dell.nodes.CloudInit.CloudConfig
+    properties:
+      resource_config: { get_input: cloudinit }
+
+  proxy_resolver:
+    type: dell.nodes.ApplicationModule
+    interfaces:
+      dell.interfaces.lifecycle:
+        precreate:
+          implementation: vm/scripts/get_proxy.py
+          executor: central_deployment_agent
+          inputs:
+            service_tag: { get_input: service_tag }
+
+  vm:
+    type: dell.nodes.nativeedge.template.NativeEdgeVM
+    properties:
+      vm_config:
+        location: { get_input: service_tag }
+        name: { get_input: name }
+        image: { get_input: image }
+        os_type: { get_input: os_type }
+        resource_constraints:
+          cpu: { get_input: cpu }
+          memory: { get_input: memory }
+          storage: { get_input: storage }
+          disk: { get_input: disk }
+          controller: { get_input: disk_controller }
+        hardware_options:
+          vTPM: { get_input: hardware_options.vTPM }
+          secure_boot: { get_input: hardware_options.secure_boot }
+          firmware_type: { get_input: hardware_options.firmware_type }
+        enable_management: { get_input: enable_management }
+        network_settings: { get_input: network_settings }
+        ports:
+          usb: []
+          serial_port: []
+          gpu: []
+          video: []
+          pcie: []
+        cloudinit: { get_attribute: [cloudinit, cloud_config] }
+        iso_files: []
+        boot_order: []
+        additional_disks: []
+    relationships:
+       - type: dell.relationships.depends_on
+         target: cloudinit
+
+  vm_info:
+    type: dell.nodes.Root
+    interfaces:
+      dell.interfaces.lifecycle:
+        start:
+          <<: *get_vm_info
+        update:
+          <<: *get_vm_info
+    relationships:
+       - type: dell.relationships.depends_on
+         target: vm
+       - type: dell.relationships.depends_on
+         target: proxy_resolver

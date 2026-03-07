@@ -1,0 +1,114 @@
+inputs:
+
+  service_tag:
+    type: string
+    required: true
+    display_label: Endpoint Service Tag
+    description: Service tag of the NativeEdge Endpoint where the VM will be deployed.
+
+  name:
+    type: string
+    required: true
+    display_label: Virtual Machine Name
+    description: Name of the Virtual Machine.
+
+  image:
+    type: string
+    required: true
+    display_label: Image ID
+    description: Image artifact ID for the VM OS image.
+
+  os_type:
+    type: string
+    display_label: OS Type
+    description: The virtual machine Operating System.
+    default: UBUNTU22.04
+
+  cpu:
+    type: integer
+    display_label: vCPUs
+    description: Number of virtual CPUs.
+    default: 2
+
+  memory:
+    type: string
+    display_label: Memory Size
+    description: Memory size with unit.
+    default: 4GB
+
+  storage:
+    type: string
+    display_label: OS Disk Size
+    description: OS disk size with unit.
+    default: 50GB
+
+  disk:
+    type: string
+    required: true
+    display_label: Datastore Path
+    description: Datastore path on the target Endpoint.
+
+  disk_controller:
+    type: string
+    display_label: Disk Controller
+    description: Disk controller type.
+    default: VIRTIO
+    constraints:
+      - valid_values: [VIRTIO, SATA, SCSI]
+
+  hardware_options.vTPM:
+    type: boolean
+    display_label: vTPM
+    description: Enable vTPM.
+    default: false
+
+  hardware_options.secure_boot:
+    type: boolean
+    display_label: Secure Boot
+    description: Enable secure boot.
+    default: false
+
+  hardware_options.firmware_type:
+    type: string
+    display_label: Firmware Type
+    description: Firmware type for the VM.
+    default: BIOS
+    constraints:
+      - valid_values: [BIOS, UEFI]
+
+  enable_management:
+    type: boolean
+    display_label: Enable Management
+    description: Enable management tap interface.
+    default: true
+
+  network_settings:
+    type: list
+    display_label: Network Settings
+    description: Pre-built network settings for the VM.
+    default: []
+
+  cloudinit:
+    type: dict
+    display_label: Cloud Init Config
+    description: Pre-built cloud-init configuration dict.
+    required: false
+    default: {}
+
+  vm_user_name:
+    type: string
+    display_label: VM Username
+    description: Username for SSH access to the VM.
+    default: edgeuser
+
+  ssh_private_key_secret:
+    type: string
+    display_label: SSH Private Key Secret
+    description: Name of the secret containing the SSH private key.
+    required: true
+
+  vm_hostname:
+    type: string
+    display_label: VM Hostname
+    description: Hostname of the Virtual Machine.
+    default: edgehost

@@ -1,0 +1,17 @@
+2.1.0.0:
+  - ticket: NE03C-289
+    developer: michal-pawlowski
+    description: Align blueprint labels
+
+2.0.0.0:
+  - ticket: NE03A-543,NE03A-542
+    developer: Jakub-Cierlik
+    description: Rebrand to Dell types and plugins
+
+1.1.0.0:
+  - ticket: NE03A-345
+    developer: mateusz-mizerski
+    description: DAP Alignment
+
+1.0.0.0
+  - BASIC

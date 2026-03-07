@@ -1,0 +1,6 @@
+capabilities:
+
+  additional_vms:
+    description: Additional VM details keyed by VM name
+    value:
+      get_attribute: [ additional_server_results, additional_vms ]

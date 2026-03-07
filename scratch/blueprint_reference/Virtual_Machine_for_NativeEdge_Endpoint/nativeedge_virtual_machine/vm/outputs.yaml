@@ -1,0 +1,31 @@
+capabilities:
+
+  vm_name:
+    description: VM Name
+    value: { get_attribute: [vm, vm_details, name] }
+
+  service_tag:
+    description: Service Tag
+    value: { get_property: [vm, vm_config, location] }
+
+  vm_details:
+    description: VM Details
+    value: { get_attribute: [ vm, vm_details ] }
+
+  vm_id:
+    description: VM ID
+    value:
+      get_attribute:
+        [vm, vm_details, id]
+
+  vm_config:
+    description: VM Config
+    value:
+      get_attribute:
+        [ vm, vm_config ]
+
+  update_vm_config:
+    description: Update VM Config
+    value:
+      get_attribute:
+        [ vm, update_vm_config ]
