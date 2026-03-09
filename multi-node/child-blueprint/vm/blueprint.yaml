@@ -66,7 +66,7 @@ node_templates:
         cloudinit: { get_attribute: [cloudinit, cloud_config] }
         iso_files: []
         boot_order: []
-        additional_disks: []
+        additional_disks: { get_input: additional_disks }
     relationships:
        - type: dell.relationships.depends_on
          target: cloudinit

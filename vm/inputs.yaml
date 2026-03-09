@@ -349,9 +349,9 @@ inputs:
       group: vm
       index: 95
 
-  additional_nics:
+  vm_add_nics:
     type: list
-    item_type: additional_nics
+    item_type: vm_add_nics
     hidden: false
     allow_update: false
     only_with: add_nics
@@ -758,7 +758,7 @@ data_types:
         type: string
         required: false
         description: VM IP, only needed when static IP is defined for the VM
-  additional_nics:
+  vm_add_nics:
     properties:
       nic_name:
         type: string
@@ -886,7 +886,7 @@ data_types:
       disk:
         type: string
         required: true
-        default: '/Datastore0'
+        default: '/DataStore0'
         description: The /DataStore path where the virtual disk will be created.
         display:
           index: 2

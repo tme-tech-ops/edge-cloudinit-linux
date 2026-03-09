@@ -1,0 +1,45 @@
+capabilities:
+
+  swfs_username:
+    description: SeaweedFS admin username
+    value: { get_attribute: [ env_postcheck, capabilities, swfs_username ] }
+
+  swfs_password:
+    description: SeaweedFS admin password
+    value: { get_attribute: [ env_postcheck, capabilities, swfs_password ] }
+
+  swfs_running:
+    description: SeaweedFS service running status
+    value: { get_attribute: [ env_postcheck, capabilities, swfs_running ] }
+
+  swfs_admin_url:
+    description: SeaweedFS Admin UI URL via IP address
+    value: { get_attribute: [ env_postcheck, capabilities, swfs_admin_url ] }
+
+  swfs_filer_url:
+    description: SeaweedFS Filer browser URL via IP address
+    value: { get_attribute: [ env_postcheck, capabilities, swfs_filer_url ] }
+
+  swfs_master_url:
+    description: SeaweedFS Master console URL via IP address
+    value: { get_attribute: [ env_postcheck, capabilities, swfs_master_url ] }
+
+  swfs_s3_url:
+    description: SeaweedFS S3 API URL via IP address
+    value: { get_attribute: [ env_postcheck, capabilities, swfs_s3_url ] }
+
+  swfs_grafana_url:
+    description: Grafana dashboard URL via IP address (N/A if monitoring disabled)
+    value: { get_attribute: [ env_postcheck, capabilities, swfs_grafana_url ] }
+
+  offline_package_name:
+    description: Name of the offline package (save operation)
+    value: { get_attribute: [ env_postcheck, capabilities, offline_package_name ] }
+
+  offline_package_uploaded:
+    description: Whether offline package was uploaded
+    value: { get_attribute: [ env_postcheck, capabilities, offline_package_uploaded ] }
+
+  offline_package_url:
+    description: URL where offline package was uploaded
+    value: { get_attribute: [ env_postcheck, capabilities, offline_package_url ] }

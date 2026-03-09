@@ -19,9 +19,9 @@ dsl_definitions:
         key: { get_secret: { concat: [ get_attribute: [ ssh_keys, secret_key_name ], "_private" ] } }
         port: 22
       proxy_settings:
-        auto_resolve: true
+        auto_resolve: false
+        target_id: { get_attribute: [proxy_resolver, _proxy_target_id] }
         target_ip: { get_attribute: [vm, vm_details, name] }
-        service_tag: { get_environment_capability: ece_service_tag }
 
 node_templates:
   ssh_keys:
@@ -63,7 +63,7 @@ node_templates:
           implementation:
             edge.nativeedge_plugin.tasks.delete_binary
 
-  prepare_config:
+  prep_config:
     type: dell.nodes.ApplicationModule
     interfaces:
       dell.interfaces.lifecycle:
@@ -74,7 +74,7 @@ node_templates:
           inputs:
             primary_segment: { get_input: segment_name }
             primary_port_forwards: { get_input: port_forward_rules }
-            additional_nics: { get_input: additional_nics }
+            vm_add_nics: { get_input: vm_add_nics }
         create:
           implementation: vm/scripts/prepare_serial_ports.py
           executor: central_deployment_agent
@@ -85,6 +85,16 @@ node_templates:
           executor: central_deployment_agent
           inputs:
             vm_password: { get_secret: { get_input: vm_password } }
+
+  proxy_resolver:
+    type: dell.nodes.ApplicationModule
+    interfaces:
+      dell.interfaces.lifecycle:
+        precreate:
+          implementation: vm/scripts/get_proxy.py
+          executor: central_deployment_agent
+          inputs:
+            service_tag: { get_environment_capability: ece_service_tag }
 
   cloudinit:
     type: dell.nodes.CloudInit.CloudConfig
@@ -116,7 +126,7 @@ node_templates:
           - name: { get_input: vm_user_name }
             sudo: ['ALL=(ALL) NOPASSWD:ALL']
             groups: users, admin
-            passwd: { get_attribute: [prepare_config, hashed_vm_passwd] }
+            passwd: { get_attribute: [prep_config, hashed_vm_passwd] }
             lock_passwd: false
             shell: /bin/bash
             ssh_authorized_keys:
@@ -138,7 +148,7 @@ node_templates:
               gateway: { get_input: gateway }
               use_dns: { get_input: use_dns }
               dns: { get_input: dns }
-              additional_nics: { get_input: additional_nics }
+              vm_add_nics: { get_input: vm_add_nics }
         create:
           inputs:
             resource_config:
@@ -149,7 +159,7 @@ node_templates:
       - type: dell.relationships.depends_on
         target: ssh_keys
       - type: dell.relationships.depends_on
-        target: prepare_config
+        target: prep_config
 
   vm:
     type: dell.nodes.nativeedge.template.NativeEdgeVM
@@ -170,10 +180,10 @@ node_templates:
           secure_boot: { get_input: hardware_options.secure_boot }
           firmware_type: { get_input: hardware_options.firmware_type }
         enable_management: { get_input: enable_management }
-        network_settings: { get_attribute: [prepare_config, network_settings] }
+        network_settings: { get_attribute: [prep_config, network_settings] }
         ports:
           usb: { get_input: usb }
-          serial_port: { get_attribute: [prepare_config, serial_ports_list] }
+          serial_port: { get_attribute: [prep_config, serial_ports_list] }
           gpu: { get_input: gpu }
           video: { get_input: video }
           pcie: { get_input: pcie }
@@ -187,7 +197,7 @@ node_templates:
        - type: dell.relationships.depends_on
          target: binary_image
        - type: dell.relationships.depends_on
-         target: prepare_config
+         target: prep_config
 
   vm_info:
     type: dell.nodes.Root
@@ -200,3 +210,5 @@ node_templates:
     relationships:
        - type: dell.relationships.depends_on
          target: vm
+       - type: dell.relationships.depends_on
+         target: proxy_resolver

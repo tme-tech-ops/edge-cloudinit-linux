@@ -47,7 +47,7 @@ input_groups:
       - use_nat
       - port_forward_rules
       - add_nics
-      - additional_nics
+      - vm_add_nics
 
   multi_node:
     display_label: Additional Virtual Machines
@@ -57,7 +57,11 @@ input_groups:
       - deploy_additional_vms
       - child_blueprint_id
       - additional_server_count
-      - additional_vms
+      - additional_vm
+      - add_vm_nics
+      - add_vm_add_nics
+      - add_vm_disks
+      - add_vm_add_disks
 
   adv_opt:
     display_label: Advanced Options

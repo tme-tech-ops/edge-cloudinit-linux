@@ -112,3 +112,9 @@ inputs:
     display_label: VM Hostname
     description: Hostname of the Virtual Machine.
     default: edgehost
+
+  additional_disks:
+    type: list
+    display_label: Additional Disks
+    description: Pre-built additional disk configurations.
+    default: []

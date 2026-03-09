@@ -7,7 +7,7 @@ imports:
 
 node_templates:
 
-  additional_server_prepare_config:
+  add_vm_prep_config:
     type: dell.nodes.ApplicationModule
     interfaces:
       dell.interfaces.lifecycle:
@@ -15,9 +15,11 @@ node_templates:
           implementation: multi-node/scripts/prepare_additional_vm.py
           executor: central_deployment_agent
           inputs:
-            additional_vms: { get_input: additional_vms }
+            additional_vm: { get_input: additional_vm }
+            add_vm_add_nics: { get_input: add_vm_add_nics }
+            add_vm_add_disks: { get_input: add_vm_add_disks }
             vm_user_name: { get_input: vm_user_name }
-            hashed_vm_passwd: { get_attribute: [prepare_config, hashed_vm_passwd] }
+            hashed_vm_passwd: { get_attribute: [prep_config, hashed_vm_passwd] }
             ssh_public_key:
               get_secret:
                 concat:
@@ -25,11 +27,11 @@ node_templates:
                   - "_public"
     relationships:
       - type: dell.relationships.depends_on
-        target: prepare_config
+        target: prep_config
       - type: dell.relationships.depends_on
         target: ssh_keys
 
-  additional_server_vm:
+  add_vm:
     type: dell.nodes.ServiceComponent
     properties:
       resource_config:
@@ -38,36 +40,37 @@ node_templates:
           id: { get_input: child_blueprint_id }
         deployment:
           inputs:
-            service_tag: { get_attribute: [additional_server_prepare_config, ece_service_tag] }
-            name: { get_attribute: [additional_server_prepare_config, vm_name] }
+            service_tag: { get_attribute: [add_vm_prep_config, ece_service_tag] }
+            name: { get_attribute: [add_vm_prep_config, vm_name] }
             image: { get_attribute: [binary_image, binary_details, extra, artifact_id] }
             os_type: { get_input: os_type }
-            cpu: { get_attribute: [additional_server_prepare_config, vcpus] }
-            memory: { get_attribute: [additional_server_prepare_config, memory_size] }
-            storage: { get_attribute: [additional_server_prepare_config, os_disk_size] }
-            disk: { get_attribute: [additional_server_prepare_config, disk] }
+            cpu: { get_attribute: [add_vm_prep_config, vcpus] }
+            memory: { get_attribute: [add_vm_prep_config, memory_size] }
+            storage: { get_attribute: [add_vm_prep_config, os_disk_size] }
+            disk: { get_attribute: [add_vm_prep_config, disk] }
             disk_controller: { get_input: disk_controller }
             hardware_options.vTPM: { get_input: hardware_options.vTPM }
             hardware_options.secure_boot: { get_input: hardware_options.secure_boot }
             hardware_options.firmware_type: { get_input: hardware_options.firmware_type }
             enable_management: { get_input: enable_management }
-            network_settings: { get_attribute: [additional_server_prepare_config, network_settings] }
-            cloudinit: { get_attribute: [additional_server_prepare_config, cloudinit_config] }
+            network_settings: { get_attribute: [add_vm_prep_config, network_settings] }
+            cloudinit: { get_attribute: [add_vm_prep_config, cloudinit_config] }
             vm_user_name: { get_input: vm_user_name }
             ssh_private_key_secret:
               concat:
                 - get_attribute: [ssh_keys, secret_key_name]
                 - "_private"
-            vm_hostname: { get_attribute: [additional_server_prepare_config, vm_hostname] }
+            vm_hostname: { get_attribute: [add_vm_prep_config, vm_hostname] }
+            additional_disks: { get_attribute: [add_vm_prep_config, additional_disks] }
     relationships:
       - type: dell.relationships.depends_on
-        target: additional_server_prepare_config
+        target: add_vm_prep_config
       - type: dell.relationships.depends_on
         target: binary_image
       - type: dell.relationships.depends_on
         target: ssh_keys
 
-  additional_server_results:
+  add_vm_results:
     type: dell.nodes.ApplicationModule
     interfaces:
       dell.interfaces.lifecycle:
@@ -76,19 +79,19 @@ node_templates:
           executor: central_deployment_agent
     relationships:
       - type: dell.relationships.depends_on
-        target: additional_server_vm
+        target: add_vm
 
 groups:
-  additional_server_group:
+  add_vm_group:
     members:
-      - additional_server_prepare_config
-      - additional_server_vm
+      - add_vm_prep_config
+      - add_vm
 
 policies:
-  additional_server_scaling:
+  add_vm_scaling:
     type: dell.policies.scaling
     properties:
       default_instances: { get_input: additional_server_count }
       min_instances: 0
       max_instances: 9
-    targets: [additional_server_group]
+    targets: [add_vm_group]

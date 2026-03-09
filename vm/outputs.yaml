@@ -17,10 +17,10 @@ capabilities:
     value:
       get_attribute: [ vm_info, capabilities, vm_public_ip ]
 
-  additional_nics:
+  vm_add_nics:
     description: Additional NIC IPs as [interface:ip, ...] or N/A if none configured
     value:
-      get_attribute: [ vm_info, capabilities, additional_nics_ips ]
+      get_attribute: [ vm_info, capabilities, vm_add_nics_ips ]
 
   tap_interface:
     description: Management (tap) interface IP
@@ -41,6 +41,10 @@ capabilities:
   vm_password_secret:
     description: Virtual Machine Password
     value: { get_secret: { get_input: vm_password } }
+
+  proxy_target_id:
+    description: Resolved proxy target ID for this endpoint
+    value: { get_attribute: [proxy_resolver, _proxy_target_id] }
 
 # Enable this to display default NAT/Host Network IP
   # endpoint_NAT_ip:

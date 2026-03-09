@@ -69,3 +69,40 @@ The VM defenitions provide complex configuration presented in a simplified UI us
 - `multi-node/scripts/collect_additional_vm_results.py` — New aggregator script that queries all `additional_server_vm` instances and builds correlated dict
 - `multi-node/outputs.yaml` — Replaced 5 separate capabilities with single `additional_vms` dict capability
 - `multi-node/child-blueprint/vm/outputs.yaml` — Renamed `vm_name` capability to `vm_name_id`
+
+# PHASE 4 - Naming Refactor, Flat Data Types, and Additional Disk Support
+
+**Problem:** (1) Node template, input, and capability names were inconsistent and verbose (e.g. `additional_server_prepare_config`, `additional_nics`). (2) Nested `vm_nic_config` data_type inside `additional_vm_config` didn't render properly in the NativeEdge UI. (3) Additional VMs had no support for extra virtual disks. (4) NIC/disk correlation by `ece_service_tag` would fail when multiple VMs share the same endpoint.
+
+**Solution:** Standardized all names across the blueprint (e.g. `add_vm_prep_config`, `add_vm`, `vm_add_nics`, `prep_config`). Replaced nested NIC data_type with three separate top-level data_types following the main VM pattern: `add_vm_config` (per-VM config with flat primary NIC fields and boolean toggles), `add_vm_add_nic_config` (additional NICs with full feature parity), and `add_vm_add_disks` (additional disks). Each NIC/disk list has a boolean toggle input for UI show/hide. The prepare script correlates additional NICs and disks to VMs by `vm_name` (not `ece_service_tag`) to support multiple VMs on the same endpoint. Added `additional_disks` pass-through from parent to child blueprint.
+
+**Files changed/added:**
+- `multi-node/inputs.yaml` — Renamed `additional_vm_config` to `add_vm_config` with flat primary NIC fields; added `add_vm_add_nic_config` and `add_vm_add_disks` data_types; added 4 new inputs with boolean toggles; removed nested `vm_nic_config`
+- `multi-node/definitions.yaml` — All node/group/policy renames; added `add_vm_add_nics` and `add_vm_add_disks` inputs to prep node; added `additional_disks` mapping to ServiceComponent
+- `multi-node/scripts/prepare_additional_vm.py` — Full rewrite: correlates 3 input lists by `vm_name`, builds network_settings with NAT support, netplan with full NIC features, disk list processing, validation matching main VM logic
+- `multi-node/scripts/collect_additional_vm_results.py` — Renamed node_id and property keys
+- `multi-node/outputs.yaml` — Renamed capability and node reference
+- `multi-node/child-blueprint/vm/inputs.yaml` — Added `additional_disks` input
+- `multi-node/child-blueprint/vm/blueprint.yaml` — Changed `additional_disks: []` to `{ get_input: additional_disks }`
+- `multi-node/child-blueprint/vm/scripts/get_vm_info.sh` — Renamed `additional_nics_ips` to `vm_add_nics_ips`
+- `vm/definitions.yaml` — Renamed `prepare_config` to `prep_config`, `additional_nics` to `vm_add_nics`
+- `vm/inputs.yaml` — Renamed input and data_type
+- `vm/outputs.yaml` — Renamed capabilities
+- `vm/scripts/prepare_network_settings.py` — Renamed dict key
+- `vm/scripts/prepare_netplan_config.py` — Renamed dict keys
+- `vm/templates/netplan_config.yaml` — Renamed Jinja2 variable
+- `vm/scripts/get_vm_info.sh` — Renamed runtime property
+- `edge-cloudinit-linux.yaml` — Added 4 new inputs to `multi_node` group; renamed input references
+
+# PHASE 5 - Fix Proxy Resolution for Child VM Sub-Services
+
+**Problem:** When deploying an upstream blueprint (e.g. object-tech-ops) as a sub-service of a child VM deployment, SSH connections fail with `Error reading SSH protocol banner`. The fabric plugin's `resolve_internal_proxy` uses `ctx.deployment.id` to resolve the proxy endpoint. For ServiceComponent child deployments, this falls back to the parent deployment's endpoint context instead of using the `service_tag` from `proxy_settings`. The child VM exists on a different endpoint, so the proxy tunnel routes to the wrong host.
+
+**Solution:** Added a `proxy_resolver` node to the base VM blueprint (matching the child blueprint's existing pattern) that explicitly resolves the `target_id` from the inventory service using `get_proxy.py`. Both the base VM and child VM now expose a `proxy_target_id` capability. Updated the object-tech-ops blueprint to use `auto_resolve: false` with the explicit `target_id` from `get_environment_capability: proxy_target_id`, bypassing the faulty auto-resolution entirely.
+
+**Files changed/added:**
+- `vm/scripts/get_proxy.py` — New file (copied from child blueprint): resolves target_id from inventory service using service_tag, sets `_proxy_target_id` and `connection_proxy_settings` runtime properties
+- `vm/definitions.yaml` — Added `proxy_resolver` node (runs `get_proxy.py` with `get_environment_capability: ece_service_tag`); updated `get_vm_info` proxy_settings from `auto_resolve: true` + `service_tag` to `auto_resolve: false` + explicit `target_id`; added `proxy_resolver` dependency to `vm_info`
+- `vm/outputs.yaml` — Added `proxy_target_id` capability
+- `multi-node/child-blueprint/vm/outputs.yaml` — Added `proxy_target_id` capability
+- `scratch/blueprint_reference/object-tech-ops/tech-ops/definitions.yaml` — Changed all 6 `proxy_settings` blocks from `service_tag`-based auto-resolution to `auto_resolve: false` + `target_id: { get_environment_capability: proxy_target_id }`

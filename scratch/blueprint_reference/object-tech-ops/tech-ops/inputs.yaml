@@ -1,0 +1,696 @@
+inputs:
+
+# SeaweedFS Configuration Inputs
+  host_fqdn:
+    type: string
+    hidden: false
+    required: false
+    allow_update: false
+    display_label: Host FQDN
+    description: |
+      Base FQDN for the host (e.g. myhost.edge.lab). Used to construct sub-domain
+      FQDNs for each service (admin.myhost.edge.lab, filer.myhost.edge.lab, etc.).
+      Caddy generates TLS certificates automatically for each sub-domain.
+      Leave blank to use the default: hostname.edge.lab
+    default: ""
+    display:
+      group: seaweedfs_config
+      index: 1
+
+  swfs_image:
+    type: string
+    hidden: false
+    required: true
+    allow_update: true
+    display_label: SeaweedFS Container Image
+    description: |
+      Container image for SeaweedFS
+    default: "chrislusf/seaweedfs:latest"
+    display:
+      group: seaweedfs_config
+      index: 5
+
+  caddy_image:
+    type: string
+    hidden: false
+    required: true
+    allow_update: true
+    display_label: Caddy Container Image
+    description: |
+      Container image for Caddy reverse proxy
+    default: "caddy:latest"
+    display:
+      group: seaweedfs_config
+      index: 10
+
+  swfs_user:
+    type: string
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: SeaweedFS Username
+    description: |
+      Username for SeaweedFS Admin UI, Filer, Master, SMB, and Grafana
+    default: "admin"
+    display:
+      group: seaweedfs_config
+      index: 15
+
+  swfs_password:
+    type: string
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: SeaweedFS Password
+    description: |
+      Password for SeaweedFS Admin UI, Filer, Master, SMB, and Grafana
+    default: "changeme"
+    display:
+      group: seaweedfs_config
+      index: 20
+
+  swfs_admin_fqdn:
+    type: string
+    hidden: false
+    required: false
+    allow_update: false
+    display_label: Admin FQDN
+    description: |
+      FQDN for SeaweedFS Admin UI and Caddy landing page.
+      Defaults to admin.<HOST_FQDN> in the script if left empty.
+    default: ""
+    display:
+      group: seaweedfs_config
+      index: 25
+
+  swfs_admin_port:
+    type: integer
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Admin Port
+    description: |
+      TCP port for the SeaweedFS Admin UI / Caddy HTTPS endpoint
+    default: 443
+    display:
+      group: seaweedfs_config
+      index: 30
+
+  swfs_master_fqdn:
+    type: string
+    hidden: false
+    required: false
+    allow_update: false
+    display_label: Master FQDN
+    description: |
+      FQDN for SeaweedFS Master UI/API.
+      Defaults to master.<HOST_FQDN> in the script if left empty.
+    default: ""
+    display:
+      group: seaweedfs_config
+      index: 35
+
+  swfs_master_port:
+    type: integer
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Master Port
+    description: |
+      TCP port for SeaweedFS Master UI/API
+    default: 9333
+    display:
+      group: seaweedfs_config
+      index: 40
+
+  enable_mq:
+    type: boolean
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Enable Message Queue
+    description: |
+      Deploy SeaweedMQ message broker alongside SeaweedFS
+    default: true
+    display:
+      group: seaweedfs_config
+      index: 45
+
+  mq_broker_port:
+    type: integer
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Message Queue Broker Port
+    description: |
+      TCP port for SeaweedMQ message broker
+    default: 17777
+    display:
+      group: seaweedfs_config
+      index: 50
+
+# Object Storage Configuration Inputs
+
+  swfs_filer_fqdn:
+    type: string
+    hidden: false
+    required: false
+    allow_update: false
+    display_label: Filer FQDN
+    description: |
+      FQDN for SeaweedFS Filer UI/API.
+      Defaults to filer.<HOST_FQDN> in the script if left empty.
+    default: ""
+    display:
+      group: object_storage_config
+      index: 1
+
+  swfs_filer_port:
+    type: integer
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Filer Port
+    description: |
+      TCP port for SeaweedFS Filer UI/API
+    default: 8888
+    display:
+      group: object_storage_config
+      index: 5
+
+  default_filer_dir_name:
+    type: string
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Default Filer Directory
+    description: |
+      Default directory name on SeaweedFS Filer for artifacts
+    default: "artifacts"
+    display:
+      group: object_storage_config
+      index: 10
+
+  artifacts_to_download:
+    type: string
+    hidden: false
+    required: false
+    allow_update: true
+    display_label: Artifacts to Download
+    description: |
+      List of artifact URLs to auto download with curl and upload to SeaweedFS filer
+    default: ""
+    display:
+      group: object_storage_config
+      index: 15
+
+  swfs_s3_fqdn:
+    type: string
+    hidden: false
+    required: false
+    allow_update: false
+    display_label: S3 FQDN
+    description: |
+      FQDN for SeaweedFS S3 API.
+      Defaults to s3.<HOST_FQDN> in the script if left empty.
+    default: ""
+    display:
+      group: object_storage_config
+      index: 20
+
+  swfs_s3_port:
+    type: integer
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: S3 Port
+    description: |
+      TCP port for SeaweedFS S3 API
+    default: 8333
+    display:
+      group: object_storage_config
+      index: 25
+
+  s3_user:
+    type: string
+    hidden: false
+    required: false
+    allow_update: false
+    display_label: S3 User
+    description: |
+      S3 user name. Defaults to the SeaweedFS username if left empty.
+    default: "admin"
+    display:
+      group: object_storage_config
+      index: 30
+
+  s3_bucket:
+    type: string
+    hidden: false
+    required: false
+    allow_update: false
+    display_label: Default S3 Bucket
+    description: |
+      Name of the default S3 bucket created in SeaweedFS
+    default: "charlie"
+    display:
+      group: object_storage_config
+      index: 35
+
+  enable_smb:
+    type: boolean
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Enable SMB Share
+    description: |
+      Install and configure Samba to expose the SeaweedFS FUSE mount as an SMB share
+    default: true
+    display:
+      group: object_storage_config
+      index: 40
+
+  enable_nfs:
+    type: boolean
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Enable NFS Export
+    description: |
+      Install and configure NFS to export the SeaweedFS FUSE mount
+    default: true
+    display:
+      group: object_storage_config
+      index: 45
+
+# Monitoring Configuration Inputs
+
+  enable_monitoring:
+    type: boolean
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Enable Monitoring Stack
+    description: |
+      Deploy Grafana, Loki, and Prometheus monitoring stack alongside SeaweedFS
+    default: false
+    display:
+      group: monitoring_config
+      index: 1
+
+  loki_image:
+    type: string
+    hidden: false
+    required: false
+    allow_update: true
+    display_label: Loki Container Image
+    description: |
+      Container image for Grafana Loki log aggregation
+    default: "grafana/loki:3.4.2"
+    display:
+      group: monitoring_config
+      index: 5
+
+  grafana_image:
+    type: string
+    hidden: false
+    required: false
+    allow_update: true
+    display_label: Grafana Container Image
+    description: |
+      Container image for Grafana OSS dashboard
+    default: "grafana/grafana-oss:11.5.2"
+    display:
+      group: monitoring_config
+      index: 10
+
+  prometheus_ext_image:
+    type: string
+    hidden: false
+    required: false
+    allow_update: true
+    display_label: Prometheus Container Image
+    description: |
+      Container image for Prometheus metrics collector
+    default: "prom/prometheus:v3.2.1"
+    display:
+      group: monitoring_config
+      index: 15
+
+  grafana_fqdn:
+    type: string
+    hidden: false
+    required: false
+    allow_update: false
+    display_label: Grafana FQDN
+    description: |
+      FQDN for Grafana UI proxied through Caddy.
+      Defaults to grafana.<HOST_FQDN> in the script if left empty.
+    default: ""
+    display:
+      group: monitoring_config
+      index: 20
+
+  grafana_port:
+    type: integer
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Grafana Port
+    description: |
+      External TCP port for Grafana UI
+    default: 3000
+    display:
+      group: monitoring_config
+      index: 25
+
+  loki_port:
+    type: integer
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Loki Port
+    description: |
+      TCP port for Loki push/query endpoint (direct, no TLS)
+    default: 3100
+    display:
+      group: monitoring_config
+      index: 30
+
+  prometheus_ext_port:
+    type: integer
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Prometheus Port
+    description: |
+      External TCP port for Prometheus remote-write receiver
+    default: 9090
+    display:
+      group: monitoring_config
+      index: 35
+
+  loki_bucket:
+    type: string
+    hidden: false
+    required: true
+    allow_update: false
+    display_label: Loki S3 Bucket
+    description: |
+      S3 bucket name used for Loki log storage
+    default: "loki-logs"
+    display:
+      group: monitoring_config
+      index: 40
+
+  cluster_name:
+    type: string
+    hidden: false
+    required: false
+    allow_update: false
+    display_label: Cluster Name
+    description: |
+      Label applied to all monitoring metrics and logs for cluster identification
+    default: "edge-lab"
+    display:
+      group: monitoring_config
+      index: 45
+
+# Env Config Inputs
+
+  offline_mode:
+    type: boolean
+    hidden: false
+    allow_update: true
+    display_label: Airgapped Mode
+    description: |
+      Set to true to download and install from specified offline package
+    default: false
+    display:
+      group: env_config
+      index: 1
+
+  offline_binary_secret:
+    type: secret_key
+    hidden: false
+    only_with: offline_mode
+    allow_update: true
+    display_label: Offline Binary Configuration Secret
+    description: |
+      Secret containing url, username, access_token, and
+      version of the offline archive binary.
+    constraints:
+    - type: binary_configuration
+    display:
+      group: env_config
+      index: 5
+
+  registry_secret:
+    type: secret_key
+    hidden: false
+    required: false
+    allow_update: true
+    display_label: Registry Authentication Secret
+    description: |
+      Secret containing the username and password for a local container registry.
+      Required when using 'install push' or 'push' run tasks to push images to
+      a local registry, or when installing from a local registry in offline mode.
+    constraints:
+    - type: basic_auth_credentials
+    display:
+      group: env_config
+      index: 7
+
+  registry_url:
+    type: string
+    hidden: false
+    required: false
+    allow_update: true
+    display_label: Registry URL:PORT
+    description: |
+      URL of the local container registry (e.g. myregistry.lab:5000)
+    default: ""
+    display:
+      group: env_config
+      index: 8
+
+  run_arg:
+    type: string
+    hidden: false
+    exclusive_with: offline_mode
+    allow_update: true
+    display_label: Install Task
+    description: |
+      Select the operation to perform:
+        install       - Install SeaweedFS from the internet
+        install push  - Install and push all container images to a local registry (requires registry_secret)
+        save          - Download all artifacts and create an offline archive (swfs-save.tar.gz)
+        push          - Push saved container images to a local registry (requires registry_secret)
+    default: "install"
+    constraints:
+      - valid_values:
+        - "install"
+        - "install push"
+        - "save"
+        - "push"
+    display:
+      group: env_config
+      index: 10
+
+  script_url:
+    type: string
+    hidden: false
+    exclusive_with: offline_mode
+    allow_update: true
+    display_label: Script URL
+    description: |
+      URL of the script to be executed
+    default: "https://github.com/Chubtoad5/seaweedfs-installer/raw/refs/heads/main/install-seaweedfs"
+    display:
+      group: env_config
+      index: 15
+
+  upload_package:
+    type: boolean
+    hidden: false
+    allow_update: true
+    display_label: Upload save package
+    description: |
+      Only for the 'save' install task. Uploads the offline archive to a file server after creation.
+    default: false
+    display:
+      group: env_config
+      index: 20
+
+  upload_binary_secret:
+    type: secret_key
+    hidden: false
+    only_with: upload_package
+    allow_update: true
+    display_label: Upload URL location
+    description: |
+      Binary configuration secret pointing to the upload location (i.e. https://myfilerserver.lab/upload_dir/).
+    constraints:
+    - type: binary_configuration
+    display:
+      group: env_config
+      index: 25
+
+  hide_log_output:
+    type: list
+    hidden: false
+    allow_update: true
+    display_label: Log Output to hide
+    description: |
+      stdout hides standard output, stderr hides standard error, both hides both
+    default: ["stdout"]
+    constraints:
+      - valid_values:
+        - "both"
+        - "stdout"
+        - "stderr"
+    display:
+      group: env_config
+      index: 30
+
+  debug:
+    type: integer
+    hidden: false
+    required: true
+    allow_update: true
+    display_label: Debug Logging
+    description: |
+      Set to 0 or 1 to enable or disable debug logging
+    default: 1
+    display:
+      group: env_config
+      index: 35
+
+# Hidden Inputs
+
+  ssh_user_private_key:
+    type: secret_key
+    hidden: true
+    allow_update: false
+    required: false
+    display_label: SSH Private Key Secret from the edge-cloud-init deployment
+    description: |
+      Name of the SSH private key secret in the secret store for the VM user
+
+  offline_binary_url:
+    type: string
+    hidden: true
+    allow_update: false
+    display_label: Offline Binary URL
+    description: |
+      URL of the OS Image that will be used to create
+      the Virtual Machine.
+    default:
+      get_secret:
+      - get_input: offline_binary_secret
+      - binary_image_url
+
+  offline_binary_access_user:
+    type: string
+    hidden: true
+    display_label: Offline Binary Username
+    description: |
+      User name of the Repository of the Image Binary that will be
+      used to create the Virtual Machine.
+    default:
+      get_secret:
+      - get_input: offline_binary_secret
+      - binary_image_access_user
+
+  offline_binary_access_token:
+    type: list
+    hidden: true
+    display_label: Offline Binary Access Token
+    description: |
+      Name of the secret storing the Token to the Repository of the
+      Image Binary that will be used to create the Virtual Machine.
+    default:
+    - get_input: offline_binary_secret
+    - binary_image_access_token
+
+  offline_binary_version:
+    type: string
+    hidden: true
+    display_label: Offline Binary Version
+    description: |
+      Ofline binary version that will be used to create
+      the Virtual Machine.
+    default:
+      get_secret:
+      - get_input: offline_binary_secret
+      - binary_image_version
+
+  upload_binary_url:
+    type: string
+    hidden: true
+    allow_update: false
+    display_label: Upload Binary URL
+    description: |
+      URL of the OS Image that will be used to create
+      the Virtual Machine.
+    default:
+      get_secret:
+      - get_input: upload_binary_secret
+      - binary_image_url
+
+  upload_binary_access_user:
+    type: string
+    hidden: true
+    display_label: Upload Binary Username
+    description: |
+      User name of the Repository of the Image Binary that will be
+      used to create the Virtual Machine.
+    default:
+      get_secret:
+      - get_input: upload_binary_secret
+      - binary_image_access_user
+
+  upload_binary_access_token:
+    type: list
+    hidden: true
+    display_label: Upload Binary Access Token
+    description: |
+      Name of the secret storing the Token to the Repository of the
+      Image Binary that will be used to create the Virtual Machine.
+    default:
+    - get_input: upload_binary_secret
+    - binary_image_access_token
+
+  upload_binary_version:
+    type: string
+    hidden: true
+    display_label: Upload Binary Version
+    description: |
+      Ofline binary version that will be used to create
+      the Virtual Machine.
+    default:
+      get_secret:
+      - get_input: upload_binary_secret
+      - binary_image_version
+
+  registry_access_user:
+    type: string
+    hidden: true
+    display_label: Registry Username
+    description: |
+      Username for the local container registry derived from registry_secret.
+    default:
+      get_secret:
+      - get_input: registry_secret
+      - username
+
+  registry_password:
+    type: string
+    hidden: true
+    display_label: Registry Password
+    description: |
+      Password for the local container registry derived from registry_secret.
+    default:
+      get_secret:
+      - get_input: registry_secret
+      - password

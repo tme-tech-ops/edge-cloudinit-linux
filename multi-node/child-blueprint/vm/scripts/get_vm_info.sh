@@ -39,10 +39,10 @@ for iface in "${ADDITIONAL_IFACES[@]}"; do
 done
 
 if [ ${#ADDITIONAL_ENTRIES[@]} -eq 0 ]; then
-  ctx instance runtime-properties capabilities.additional_nics_ips "N/A"
+  ctx instance runtime-properties capabilities.vm_add_nics_ips "N/A"
 else
   RESULT=$(printf '"%s",' "${ADDITIONAL_ENTRIES[@]}")
-  ctx instance runtime-properties capabilities.additional_nics_ips "[${RESULT%,}]"
+  ctx instance runtime-properties capabilities.vm_add_nics_ips "[${RESULT%,}]"
 fi
 
 # --- Management / Tap interface ---
