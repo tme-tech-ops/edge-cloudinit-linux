@@ -12,12 +12,12 @@ inputs:
       group: multi_node
       index: 1
 
-  child_blueprint_id:
+  utility_blueprint_id:
     type: string
     hidden: false
     only_with: deploy_additional_vms
-    display_label: Child VM Blueprint ID
-    description: ID of the uploaded child blueprint for additional VM deployments.
+    display_label: Utility VM Blueprint Name
+    description: Name of the uploaded edge-cloudinit Utility blueprint for additional VM deployments.
     default: edge-cloudinit-utility-vm
     display:
       group: multi_node

@@ -1,7 +1,7 @@
 tosca_definitions_version: dell_1_1
 
 description: >
-  Child blueprint that deploys a single Virtual Machine on a NativeEdge Endpoint
+  Utility blueprint that deploys a single Virtual Machine on a NativeEdge Endpoint
   using cloud-init. Called by the parent blueprint via ServiceComponent.
 
 imports:

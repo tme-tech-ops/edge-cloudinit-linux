@@ -37,7 +37,7 @@ node_templates:
       resource_config:
         blueprint:
           external_resource: true
-          id: { get_input: child_blueprint_id }
+          id: { get_input: utility_blueprint_id }
         deployment:
           inputs:
             service_tag: { get_attribute: [add_vm_prep_config, ece_service_tag] }

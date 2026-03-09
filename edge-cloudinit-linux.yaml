@@ -55,7 +55,7 @@ input_groups:
     index: 2
     inputs:
       - deploy_additional_vms
-      - child_blueprint_id
+      - utility_blueprint_id
       - additional_server_count
       - additional_vm
       - add_vm_nics
