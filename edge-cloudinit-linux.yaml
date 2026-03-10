@@ -12,7 +12,6 @@ imports:
   - multi-node/inputs.yaml
   - multi-node/outputs.yaml
 
-
 input_groups:
   basic_vm:
     display_label: Basic Configuration
@@ -28,6 +27,12 @@ input_groups:
       - vm_password
       - disk_wrapper
       - vnic_0_segment_name
+      - use_dhcp
+      - static_ip
+      - use_gateway
+      - gateway
+      - use_dns
+      - dns
   adv_vm:
     display_label: Advanced Virtual Machine Configuration
     collapsible: true
@@ -42,12 +47,6 @@ input_groups:
       - disk_controller
       - add_disks
       - additional_disks
-      - use_dhcp
-      - static_ip
-      - use_gateway
-      - gateway
-      - use_dns
-      - dns
       - use_nat
       - port_forward_rules
       - add_nics

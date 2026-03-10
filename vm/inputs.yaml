@@ -147,6 +147,87 @@ inputs:
       group: basic_vm
       index: 40
 
+  use_dhcp:
+    type: boolean
+    hidden: false
+    display_label: Use DHCP
+    description: |
+      If false, then static ip must be configured with optional DNS and Gateway.
+    default: true
+    display:
+      group: basic_vm
+      index: 45
+
+  static_ip:
+    type: string
+    hidden: false
+    exclusive_with: use_dhcp
+    display_label: Static IP in CIDR notation
+    description: |
+      Static IP Address in CIDR notation that will be assigned to the VM 
+      Example: 192.168.0.100/24
+    constraints:
+    - pattern: '^(?:((25[0-5]|2[0-4]\d|1\d\d|\d{1,2})(\.(25[0-5]|2[0-4]\d|1\d\d|\d{1,2})){3})\/(3[0-2]|[12]?\d)|)$'
+      error_message: |
+        Invalid format for IP Address in CIDR format.
+        Example: 172.16.0.1/16
+    required: false
+    display:
+      group: basic_vm
+      index: 50
+
+  use_gateway:
+    type: boolean
+    hidden: false
+    exclusive_with: use_dhcp
+    display_label: Use Gateway
+    description: |
+      If false, Gateway will not be configured
+    default: false
+    display:
+      group: basic_vm
+      index: 55
+
+  gateway:
+    type: string
+    hidden: false
+    only_with: use_gateway
+    display_label: Gateway IP
+    description: IP address of the default gateway.
+    required: false
+    constraints:
+    - pattern: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$|^$
+      error_message: |
+        Invalid format for IP Address.
+        Example: 172.16.0.1
+    display:
+      group: basic_vm
+      index: 60
+
+  use_dns:
+    type: boolean
+    hidden: false
+    exclusive_with: use_dhcp
+    display_label: Use DNS
+    description: |
+      If false, DNS will not be configured
+    default: false
+    display:
+      group: basic_vm
+      index: 65
+
+  dns:
+    type: list
+    hidden: false
+    only_with: use_dns
+    display_label: DNS Servers
+    description: List of DNS servers to use.
+    required: false
+    default: []
+    display:
+      group: basic_vm
+      index: 70
+
 ## Advanced Virtual Machine Configuration
 
   hardware_options.firmware_type:
@@ -281,87 +362,6 @@ inputs:
     display:
       group: adv_vm
       index: 40
-
-  use_dhcp:
-    type: boolean
-    hidden: false
-    display_label: Use DHCP
-    description: |
-      If false, then static ip must be configured with optional DNS and Gateway.
-    default: true
-    display:
-      group: adv_vm
-      index: 45
-
-  static_ip:
-    type: string
-    hidden: false
-    exclusive_with: use_dhcp
-    display_label: Static IP in CIDR notation
-    description: |
-      Static IP Address in CIDR notation that will be assigned to the VM 
-      Example: 192.168.0.100/24
-    constraints:
-    - pattern: '^(?:((25[0-5]|2[0-4]\d|1\d\d|\d{1,2})(\.(25[0-5]|2[0-4]\d|1\d\d|\d{1,2})){3})\/(3[0-2]|[12]?\d)|)$'
-      error_message: |
-        Invalid format for IP Address in CIDR format.
-        Example: 172.16.0.1/16
-    required: false
-    display:
-      group: adv_vm
-      index: 50
-
-  use_gateway:
-    type: boolean
-    hidden: false
-    exclusive_with: use_dhcp
-    display_label: Use Gateway
-    description: |
-      If false, Gateway will not be configured
-    default: false
-    display:
-      group: adv_vm
-      index: 55
-
-  gateway:
-    type: string
-    hidden: false
-    only_with: use_gateway
-    display_label: Gateway IP
-    description: IP address of the default gateway.
-    required: false
-    constraints:
-    - pattern: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$|^$
-      error_message: |
-        Invalid format for IP Address.
-        Example: 172.16.0.1
-    display:
-      group: adv_vm
-      index: 60
-
-  use_dns:
-    type: boolean
-    hidden: false
-    exclusive_with: use_dhcp
-    display_label: Use DNS
-    description: |
-      If false, DNS will not be configured
-    default: false
-    display:
-      group: adv_vm
-      index: 65
-
-  dns:
-    type: list
-    hidden: false
-    only_with: use_dns
-    display_label: DNS Servers
-    description: List of DNS servers to use.
-    required: false
-    default: []
-    display:
-      group: adv_vm
-      index: 70
  
   use_nat:
     type: boolean
@@ -372,7 +372,7 @@ inputs:
     default: false
     display:
       group: adv_vm
-      index: 75
+      index: 45
 
   port_forward_rules:
     type: list
@@ -387,7 +387,7 @@ inputs:
     default: []
     display:
       group: adv_vm
-      index: 80
+      index: 50
 
   add_nics:
     type: boolean
@@ -398,7 +398,7 @@ inputs:
     default: false
     display:
       group: adv_vm
-      index: 85
+      index: 55
 
   vm_add_nics:
     type: list
@@ -414,7 +414,7 @@ inputs:
     default: []
     display:
       group: adv_vm
-      index: 90
+      index: 60
 
   use_passthrough:
     type: boolean
@@ -425,7 +425,7 @@ inputs:
     default: false
     display:
       group: adv_vm
-      index: 95
+      index: 65
 
   usb_wrapper:
     type: list
@@ -446,7 +446,7 @@ inputs:
     default: []
     display:
       group: adv_vm
-      index: 100
+      index: 70
 
   gpu_wrapper:
     type: list
@@ -467,7 +467,7 @@ inputs:
     default: []
     display:
       group: adv_vm
-      index: 105
+      index: 75
 
   pcie_wrapper:
     type: list
@@ -487,7 +487,7 @@ inputs:
     default: []
     display:
       group: adv_vm
-      index: 110
+      index: 80
 
   video:
     type: list
@@ -505,7 +505,7 @@ inputs:
     default: []
     display:
       group: adv_vm
-      index: 115
+      index: 85
 
   # video: # CANNOT Use jmespath for video controllers, keeping for reference
   #   type: list
@@ -547,7 +547,7 @@ inputs:
                 get_environment_capability: ece_service_tag
     display:
       group: adv_vm
-      index: 120
+      index: 90
 
 ### Hidden inputs ###
 
