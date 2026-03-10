@@ -1,33 +1,8 @@
 inputs:
 
-  deploy_additional_vms:
-    type: boolean
-    hidden: false
-    display_label: Deploy Additional VMs
-    description: |
-      Check to deploy additional Virtual Machines.
-      Requires additional_server_count and additional_vms list.
-    default: false
-    display:
-      group: multi_node
-      index: 1
-
-  utility_blueprint_id:
-    type: string
-    hidden: false
-    display_label: Utility VM Blueprint Name
-    description: >
-      Name of the uploaded edge-cloudinit Utility blueprint.
-      Used for both the base VM and additional VM deployments.
-    default: edge-cloudinit-utility-vm
-    display:
-      group: artifact
-      index: 5
-
   additional_server_count:
     type: integer
     hidden: false
-    only_with: deploy_additional_vms
     allow_update: false
     display_label: Number of Additional VMs
     description: |
@@ -44,7 +19,6 @@ inputs:
     type: list
     item_type: add_vm_config
     hidden: false
-    only_with: deploy_additional_vms
     allow_update: false
     display_label: Additional VM Configurations
     description: |
@@ -60,7 +34,6 @@ inputs:
   add_vm_nics:
     type: boolean
     hidden: false
-    only_with: deploy_additional_vms
     display_label: Add NICs to Additional VMs
     description: |
       Check to add additional network interfaces to Additional VMs.
@@ -89,7 +62,6 @@ inputs:
   add_vm_disks:
     type: boolean
     hidden: false
-    only_with: deploy_additional_vms
     display_label: Add Disks to Additional VMs
     description: |
       Check to add additional virtual disks to Additional VMs.
@@ -118,7 +90,6 @@ inputs:
   add_vm_passthrough:
     type: boolean
     hidden: false
-    only_with: deploy_additional_vms
     display_label: Add Passthrough Devices to Additional VMs
     description: |
       Check to add host/device passthrough (USB, Serial Port, GPU, Video, PCIe)

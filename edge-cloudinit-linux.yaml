@@ -14,31 +14,34 @@ imports:
 
 
 input_groups:
-  artifact:
-    display_label: Deployment Artifacts
+  basic_vm:
+    display_label: Basic Configuration
     collapsible: true
     index: 0
     inputs:
       - edge_os_image_secret
       - os_type
       - utility_blueprint_id
-  vm:
-    display_label: Virtual Machine Configuration
-    collapsible: true
-    index: 1
-    inputs:
       - vm_name
       - vm_hostname
       - vm_user_name
       - vm_password
+      - disk_wrapper
+      - vnic_0_segment_name
+  adv_vm:
+    display_label: Advanced Virtual Machine Configuration
+    collapsible: true
+    index: 1
+    inputs:
+      - hardware_options.firmware_type
+      - hardware_options.secure_boot
+      - hardware_options.vTPM
       - vcpus
       - memory_size
       - os_disk_size
       - disk_controller
-      - disk_wrapper
       - add_disks
       - additional_disks
-      - vnic_0_segment_name
       - use_dhcp
       - static_ip
       - use_gateway
@@ -49,13 +52,18 @@ input_groups:
       - port_forward_rules
       - add_nics
       - vm_add_nics
+      - use_passthrough
+      - usb_wrapper
+      - gpu_wrapper
+      - pcie_wrapper
+      - video
+      - serial_port_wrapper
 
   multi_node:
     display_label: Additional Virtual Machines
     collapsible: true
     index: 2
     inputs:
-      - deploy_additional_vms
       - additional_server_count
       - additional_vm
       - add_vm_nics
@@ -64,21 +72,6 @@ input_groups:
       - add_vm_add_disks
       - add_vm_passthrough
       - add_vm_passthrough_devices
-
-  adv_opt:
-    display_label: Advanced Options
-    collapsible: true
-    index: 3
-    inputs:
-      - hardware_options.vTPM
-      - hardware_options.secure_boot
-      - hardware_options.firmware_type
-      - use_passthrough
-      - pcie
-      - usb
-      - serial_port_wrapper
-      - gpu
-      - video
 
 labels:
   csys-obj-type:
