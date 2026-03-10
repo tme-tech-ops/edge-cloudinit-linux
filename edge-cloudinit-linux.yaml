@@ -21,6 +21,7 @@ input_groups:
     inputs:
       - edge_os_image_secret
       - os_type
+      - utility_blueprint_id
   vm:
     display_label: Virtual Machine Configuration
     collapsible: true
@@ -55,7 +56,6 @@ input_groups:
     index: 2
     inputs:
       - deploy_additional_vms
-      - utility_blueprint_id
       - additional_server_count
       - additional_vm
       - add_vm_nics

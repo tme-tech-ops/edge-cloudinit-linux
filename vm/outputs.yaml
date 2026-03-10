@@ -1,32 +1,5 @@
 capabilities:
 
-  service_tag:
-    description: Service Tag
-    value: { get_property: [vm, vm_config, location] }
-
-  vm_name_id:
-    description: Virtual Machine Name
-    value: { get_attribute: [vm, vm_details, name] }
-
-  vm_hostname:
-    description: Virtual Machine hostname
-    value: { get_input: vm_hostname }
-
-  vm_primary_ip:
-    description: Primary NIC IP
-    value:
-      get_attribute: [ vm_info, capabilities, vm_public_ip ]
-
-  vm_add_nics:
-    description: Additional NIC IPs as [interface:ip, ...] or N/A if none configured
-    value:
-      get_attribute: [ vm_info, capabilities, vm_add_nics_ips ]
-
-  tap_interface:
-    description: Management (tap) interface IP
-    value:
-      get_attribute: [ vm_info, capabilities, tap_ip ]
-
   vm_user_name:
     description: Virtual Machine User Name
     value: { get_input: vm_user_name }
@@ -37,21 +10,7 @@ capabilities:
       concat:
         - get_attribute: [ ssh_keys, secret_key_name ]
         - "_private"
-  
+
   vm_password_secret:
     description: Virtual Machine Password
     value: { get_secret: { get_input: vm_password } }
-
-  proxy_target_id:
-    description: Resolved proxy target ID for this endpoint
-    value: { get_attribute: [proxy_resolver, _proxy_target_id] }
-
-# Enable this to display default NAT/Host Network IP
-  # endpoint_NAT_ip:
-  #   description: NativeEdge Endpoint Default Host Network IP
-  #   value:
-  #     concat:
-  #       - jmespath:
-  #           - extra.hw_core.network.hostNetwork[?isDefault==`true`].ipAddress | [0] | to_string(@)
-  #           - get_inventory:
-  #               get_environment_capability: ece_service_tag

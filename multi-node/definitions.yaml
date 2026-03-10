@@ -76,14 +76,16 @@ node_templates:
       - type: dell.relationships.depends_on
         target: ssh_keys
 
-  add_vm_results:
+  vm_results:
     type: dell.nodes.ApplicationModule
     interfaces:
       dell.interfaces.lifecycle:
         start:
-          implementation: multi-node/scripts/collect_additional_vm_results.py
+          implementation: multi-node/scripts/collect_vm_results.py
           executor: central_deployment_agent
     relationships:
+      - type: dell.relationships.depends_on
+        target: base_vm
       - type: dell.relationships.depends_on
         target: add_vm
 

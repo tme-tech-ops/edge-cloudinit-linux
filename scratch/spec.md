@@ -118,3 +118,42 @@ The VM defenitions provide complex configuration presented in a simplified UI us
 - `multi-node/scripts/prepare_additional_vm.py` — Added `build_passthrough_devices()` helper that groups entries by device_type; filters passthrough entries by vm_name per instance; sets `usb`, `serial_port`, `gpu`, `video`, `pcie` runtime properties
 - `multi-node/definitions.yaml` — Passes `add_vm_passthrough_devices` input to prep script; passes all 5 device-type lists from `add_vm_prep_config` to the child ServiceComponent
 - `edge-cloudinit-linux.yaml` — Added `add_vm_passthrough` and `add_vm_passthrough_devices` to `multi_node` input group
+
+# PHASE 7 - Convert Base VM to ServiceComponent
+
+**Problem:** The base VM deployed inline using 7 node templates (`ssh_keys`, `binary_image`, `prep_config` with 3 scripts, `cloudinit` Jinja2 node, `vm`, `vm_info`, `proxy_resolver`) directly in the parent blueprint. This duplicated logic already handled by the child blueprint, creating maintenance burden and feature parity gaps.
+
+**Solution:** Converted the base VM to use `dell.nodes.ServiceComponent` calling the same child blueprint (`edge-cloudinit-utility-vm`) used by additional VMs. Created a consolidated `prepare_base_vm_config.py` script that replaces the 3-script pipeline plus cloudinit node logic, producing `network_settings` and `cloudinit_config` runtime properties. The parent blueprint now has only 3 node templates (`ssh_keys`, `binary_image`, `prep_config`) plus the `base_vm` ServiceComponent. Moved `utility_blueprint_id` to always-visible scope since the base VM now requires it.
+
+**Key design decisions:**
+- Base VM inputs (`vm/inputs.yaml`) remain unchanged — no user-facing changes
+- Port forward rules still supported for base VM (not for add_vm child VMs)
+- Child blueprint must always be uploaded before the parent (operational change)
+- Base VM now appears as a child deployment in the Orchestrator UI
+- Python-based netplan generation replaces Jinja2 template approach
+- Optional cloudinit merge via `deep_merge()` preserved for base VM
+
+**Files changed/added:**
+- `vm/scripts/prepare_base_vm_config.py` — New consolidated prep script replacing `prepare_network_settings.py`, `prepare_netplan_config.py`, `prepare_passwd.py`, and `cloudinit` node logic. Functions: `build_network_settings()`, `build_netplan_yaml()`, `hash_password()`, `build_cloudinit_config()`, `deep_merge()`. Produces `network_settings` and `cloudinit_config` runtime properties.
+- `vm/definitions.yaml` — Major rewrite: removed `fabric-plugin` import, `get_vm_info` DSL definition, `cloudinit`, `vm`, `vm_info`, `proxy_resolver` node templates. Replaced `prep_config` with single consolidated script. Added `base_vm` as `dell.nodes.ServiceComponent` referencing `utility_blueprint_id`.
+- `vm/outputs.yaml` — Rewritten to read from ServiceComponent capabilities (`get_attribute: [base_vm, capabilities, ...]`) instead of inline node attributes. Added `proxy_target_id` capability.
+- `multi-node/child-blueprint/vm/outputs.yaml` — Added `vm_add_nics` capability for feature parity with base VM outputs
+- `multi-node/inputs.yaml` — Removed `only_with: deploy_additional_vms` from `utility_blueprint_id`, moved to `artifact` group (always visible)
+- `edge-cloudinit-linux.yaml` — Added `utility_blueprint_id` to `artifact` input group, removed from `multi_node` group
+
+**Scripts now unused by parent** (still used by child blueprint's own copies):
+- `vm/scripts/prepare_network_settings.py`, `vm/scripts/prepare_netplan_config.py`, `vm/scripts/prepare_passwd.py`, `vm/scripts/prepare_serial_ports.py`, `vm/scripts/get_proxy.py`, `vm/scripts/get_vm_info.sh`, `vm/templates/netplan_config.yaml`
+
+# PHASE 8 - VM Results and Capabilities Cleanup
+
+**Problem:** With the base VM now deployed as a ServiceComponent (Phase 7), the parent blueprint exposed 7 individual capabilities for the base VM (`service_tag`, `vm_name_id`, `vm_hostname`, `vm_primary_ip`, `vm_add_nics`, `tap_interface`, `proxy_target_id`) which cluttered the deployment outputs. The `add_vm_results` aggregator only collected additional VM results, and neither the aggregator nor the child blueprint exposed disk or passthrough device information.
+
+**Solution:** Renamed `add_vm_results` to `vm_results` and expanded the aggregator to collect both base VM and additional VM results into a unified structured format. Added `vm_add_disks` and `vm_add_passthrough` capabilities to the child blueprint. Removed individual base VM capabilities from the parent, keeping only shared credentials (`vm_user_name`, `vm_ssh_private_key`, `vm_password_secret`). The `base_vm` result is a single dict; `additional_vm` remains a dict keyed by `vm_name_id`.
+
+**Files changed/added:**
+- `multi-node/child-blueprint/vm/outputs.yaml` — Added `vm_add_disks` (from `vm_config.additionalDisks`) and `vm_add_passthrough` (from `vm_config.ports`) capabilities
+- `multi-node/scripts/collect_vm_results.py` — New unified aggregator script replacing `collect_additional_vm_results.py`; queries both `base_vm` and `add_vm` instances; builds standardized entries with `service_tag`, `hostname`, `primary_ip`, `tap_ip`, `vm_add_nics`, `vm_add_disks`, `vm_add_passthrough`, `proxy_target_id`
+- `multi-node/scripts/collect_additional_vm_results.py` — Deleted (replaced by `collect_vm_results.py`)
+- `multi-node/definitions.yaml` — Renamed `add_vm_results` → `vm_results`; updated script path; added `base_vm` dependency
+- `multi-node/outputs.yaml` — Added `base_vm` capability; updated `additional_vm` to reference `vm_results` node
+- `vm/outputs.yaml` — Removed 7 individual capabilities; kept only `vm_user_name`, `vm_ssh_private_key`, `vm_password_secret`

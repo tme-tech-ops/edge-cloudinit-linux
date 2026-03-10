@@ -15,13 +15,14 @@ inputs:
   utility_blueprint_id:
     type: string
     hidden: false
-    only_with: deploy_additional_vms
     display_label: Utility VM Blueprint Name
-    description: Name of the uploaded edge-cloudinit Utility blueprint for additional VM deployments.
+    description: >
+      Name of the uploaded edge-cloudinit Utility blueprint.
+      Used for both the base VM and additional VM deployments.
     default: edge-cloudinit-utility-vm
     display:
-      group: multi_node
-      index: 2
+      group: artifact
+      index: 5
 
   additional_server_count:
     type: integer

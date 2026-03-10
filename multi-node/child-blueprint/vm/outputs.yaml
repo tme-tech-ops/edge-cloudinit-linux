@@ -40,6 +40,18 @@ capabilities:
     description: Management (tap) interface IP
     value: { get_attribute: [vm_info, capabilities, tap_ip] }
 
+  vm_add_nics:
+    description: Additional NIC IPs as [interface:ip, ...] or N/A if none configured
+    value: { get_attribute: [vm_info, capabilities, vm_add_nics_ips] }
+
+  vm_add_disks:
+    description: Additional disk configurations
+    value: { get_attribute: [vm, vm_config, additionalDisks] }
+
+  vm_add_passthrough:
+    description: Passthrough device configurations
+    value: { get_attribute: [vm, vm_config, ports] }
+
   proxy_target_id:
     description: Resolved proxy target ID for this endpoint
     value: { get_attribute: [proxy_resolver, _proxy_target_id] }
