@@ -18,6 +18,7 @@ node_templates:
             additional_vm: { get_input: additional_vm }
             add_vm_add_nics: { get_input: add_vm_add_nics }
             add_vm_add_disks: { get_input: add_vm_add_disks }
+            add_vm_passthrough_devices: { get_input: add_vm_passthrough_devices }
             vm_user_name: { get_input: vm_user_name }
             hashed_vm_passwd: { get_attribute: [prep_config, hashed_vm_passwd] }
             ssh_public_key:
@@ -62,6 +63,11 @@ node_templates:
                 - "_private"
             vm_hostname: { get_attribute: [add_vm_prep_config, vm_hostname] }
             additional_disks: { get_attribute: [add_vm_prep_config, additional_disks] }
+            usb: { get_attribute: [add_vm_prep_config, usb] }
+            serial_port: { get_attribute: [add_vm_prep_config, serial_port] }
+            gpu: { get_attribute: [add_vm_prep_config, gpu] }
+            video: { get_attribute: [add_vm_prep_config, video] }
+            pcie: { get_attribute: [add_vm_prep_config, pcie] }
     relationships:
       - type: dell.relationships.depends_on
         target: add_vm_prep_config

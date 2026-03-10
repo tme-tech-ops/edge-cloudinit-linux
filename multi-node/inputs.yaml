@@ -114,6 +114,36 @@ inputs:
       group: multi_node
       index: 30
 
+  add_vm_passthrough:
+    type: boolean
+    hidden: false
+    only_with: deploy_additional_vms
+    display_label: Add Passthrough Devices to Additional VMs
+    description: |
+      Check to add host/device passthrough (USB, Serial Port, GPU, Video, PCIe)
+      to additional Virtual Machines.
+      Use the VM Name to correlate devices with VM entries.
+    default: false
+    display:
+      group: multi_node
+      index: 35
+
+  add_vm_passthrough_devices:
+    type: list
+    item_type: add_vm_passthrough_config
+    hidden: false
+    allow_update: false
+    only_with: add_vm_passthrough
+    display_label: Additional VM Passthrough Devices
+    description: >
+      List of passthrough device entries for Additional VMs.
+      Use the VM Name to associate each device with a VM.
+    required: false
+    default: []
+    display:
+      group: multi_node
+      index: 40
+
 data_types:
   add_vm_config:
     properties:
@@ -399,3 +429,32 @@ data_types:
           display_name: Storage Unit
         constraints:
           - valid_values: [ KB, MB, GB, TB, PB, EB, ZB, YB ]
+
+  add_vm_passthrough_config:
+    properties:
+      vm_name:
+        type: string
+        required: true
+        description: >
+          VM Name to correlate this passthrough device with an additional VM entry.
+        display:
+          index: 1
+          display_name: VM Name
+      device_type:
+        type: string
+        required: true
+        description: Type of passthrough device.
+        display:
+          index: 2
+          display_name: Device Type
+        constraints:
+          - valid_values: [usb, serial_port, gpu, video, pcie]
+      device:
+        type: string
+        required: true
+        description: >
+          Device logical name or identifier.
+          For serial ports, use PORT_MODE format (e.g. COM-1_RS-232).
+        display:
+          index: 3
+          display_name: Device

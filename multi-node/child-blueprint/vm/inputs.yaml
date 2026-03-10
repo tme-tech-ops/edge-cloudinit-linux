@@ -6,6 +6,24 @@ inputs:
     display_label: Endpoint Service Tag
     description: Service tag of the NativeEdge Endpoint where the VM will be deployed.
 
+  vm_user_name:
+    type: string
+    display_label: VM Username
+    description: Username for SSH access to the VM.
+    default: edgeuser
+
+  ssh_private_key_secret:
+    type: string
+    display_label: SSH Private Key Secret
+    description: Name of the secret containing the SSH private key.
+    required: true
+
+  vm_hostname:
+    type: string
+    display_label: VM Hostname
+    description: Hostname of the Virtual Machine.
+    default: edgehost
+
   name:
     type: string
     required: true
@@ -88,6 +106,72 @@ inputs:
     description: Pre-built network settings for the VM.
     default: []
 
+  usb:
+    type: list
+    item_type: string
+    hidden: true
+    allow_update: false
+    display_label: USB Devices List
+    description: |
+      A list of USB logical names to pass through to the Virtual Machine.
+      Valid values are "USB-1" to "USB-10"
+      Please make sure to select the USB port where USB device is connected.
+    required: false
+    default: []
+
+  serial_port:
+    type: list
+    item_type: string
+    hidden: true
+    allow_update: false
+    display_label: Serial Port
+    description: |
+      Serial port passthrough.
+      Please make sure to select the port where required device is connected.
+      Example:
+        - {"port": "COM-1"}
+        - {"port": "COM-2"}
+    required: false
+    default: []
+
+  gpu:
+    type: list
+    item_type: string
+    hidden: true
+    allow_update: false
+    display_label: GPU Passthrough
+    description: |
+      A list of GPU logical names.
+      Please make sure to select the GPU that is currently available in your
+      Endpoint. A list of GPU logical names available for your endpoint can
+      be found in the NativeEdge UI under Endpoints / Hardware / Peripherals
+    required: false
+    default: []
+
+  video:
+    type: list
+    item_type: string
+    hidden: true
+    allow_update: false
+    display_label: Video Passthrough
+    description: |
+      Video passthrough. A list of Video logical names (string).
+      E.g. ['onboarded-controller']
+    required: false
+    default: []
+
+  pcie:
+    type: list
+    item_type: string
+    hidden: false
+    allow_update: false
+    display_label: PCIe Passthrough
+    description: |
+      PCIe passthrough. A list of PCIe logical names (string).
+      E.g. ['SUNIX Co., Ltd. Multiport serial controller']
+    required: false
+    default: []
+
   cloudinit:
     type: dict
     display_label: Cloud Init Config
@@ -95,23 +179,29 @@ inputs:
     required: false
     default: {}
 
-  vm_user_name:
-    type: string
-    display_label: VM Username
-    description: Username for SSH access to the VM.
-    default: edgeuser
+  iso_files:
+    type: list
+    item_type: string
+    hidden: false
+    allow_update: false
+    display_label: ISO Files
+    description: |
+      List ISO files (references to catalog) to be downloaded before
+      Virtual Machine provisioning.
+    default: []
+    required: false
 
-  ssh_private_key_secret:
-    type: string
-    display_label: SSH Private Key Secret
-    description: Name of the secret containing the SSH private key.
-    required: true
-
-  vm_hostname:
-    type: string
-    display_label: VM Hostname
-    description: Hostname of the Virtual Machine.
-    default: edgehost
+  boot_order:
+    type: list
+    item_type: string
+    required: false
+    hidden: false
+    allow_update: false
+    display_label: Boot Order
+    description: |
+      Boot order of the Virtual Machine.
+      If empty no changes will be made.
+    default: []
 
   additional_disks:
     type: list

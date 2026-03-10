@@ -177,6 +177,23 @@ def build_netplan_yaml(vm_config, add_nics, mgmt_interface):
     return base64.b64encode(netplan_yaml.encode('utf-8')).decode('utf-8')
 
 
+def build_passthrough_devices(passthrough_entries):
+    """Group passthrough device entries by device_type, return per-type lists."""
+    result = {
+        'usb': [],
+        'serial_port': [],
+        'gpu': [],
+        'video': [],
+        'pcie': []
+    }
+    for entry in passthrough_entries:
+        dtype = entry.get('device_type', '')
+        device = entry.get('device', '')
+        if dtype in result and device:
+            result[dtype].append(device)
+    return result
+
+
 def build_additional_disks(add_disks):
     """Build additional_disks list for NativeEdgeVM node."""
     disks = []
@@ -234,6 +251,7 @@ if __name__ == "__main__":
     additional_vm = inputs.get('additional_vm', [])
     add_vm_add_nics = inputs.get('add_vm_add_nics', [])
     add_vm_add_disks = inputs.get('add_vm_add_disks', [])
+    add_vm_passthrough_devices = inputs.get('add_vm_passthrough_devices', [])
     ssh_public_key = inputs.get('ssh_public_key', '')
     hashed_vm_passwd = inputs.get('hashed_vm_passwd', '')
     vm_user_name = inputs.get('vm_user_name', 'edgeuser')
@@ -266,9 +284,16 @@ if __name__ == "__main__":
         d for d in add_vm_add_disks
         if d.get('vm_name') == vm_name
     ]
+    my_passthrough = [
+        p for p in add_vm_passthrough_devices
+        if p.get('vm_name') == vm_name
+    ]
+    passthrough = build_passthrough_devices(my_passthrough)
     ctx.logger.info(
-        f"Correlated {len(my_add_nics)} additional NIC(s) and "
-        f"{len(my_add_disks)} additional disk(s) for VM '{vm_name}'"
+        f"Correlated {len(my_add_nics)} additional NIC(s), "
+        f"{len(my_add_disks)} additional disk(s), and "
+        f"{sum(len(v) for v in passthrough.values())} passthrough device(s) "
+        f"for VM '{vm_name}'"
     )
 
     vm_hostname = vm_config.get('vm_hostname', 'edgehost')
@@ -303,6 +328,13 @@ if __name__ == "__main__":
     # Build additional disks
     ctx.instance.runtime_properties['additional_disks'] = \
         build_additional_disks(my_add_disks)
+
+    # Set passthrough device lists
+    ctx.instance.runtime_properties['usb'] = passthrough['usb']
+    ctx.instance.runtime_properties['serial_port'] = passthrough['serial_port']
+    ctx.instance.runtime_properties['gpu'] = passthrough['gpu']
+    ctx.instance.runtime_properties['video'] = passthrough['video']
+    ctx.instance.runtime_properties['pcie'] = passthrough['pcie']
 
     ctx.instance.update()
     ctx.logger.info(

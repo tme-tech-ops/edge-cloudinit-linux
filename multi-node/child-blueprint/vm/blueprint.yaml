@@ -37,6 +37,16 @@ node_templates:
           inputs:
             service_tag: { get_input: service_tag }
 
+  format_serial_ports:
+    type: dell.nodes.Root
+    interfaces:
+      dell.interfaces.lifecycle:
+        create:
+          implementation: vm/scripts/prepare_serial_ports.py
+          executor: central_deployment_agent
+          inputs:
+            serial_port: { get_input: serial_port }
+
   vm:
     type: dell.nodes.nativeedge.template.NativeEdgeVM
     properties:
@@ -58,18 +68,20 @@ node_templates:
         enable_management: { get_input: enable_management }
         network_settings: { get_input: network_settings }
         ports:
-          usb: []
-          serial_port: []
-          gpu: []
-          video: []
-          pcie: []
+          usb: { get_input: usb }
+          serial_port: { get_attribute: [format_serial_ports, serial_ports_list] }
+          gpu: { get_input: gpu }
+          video: { get_input: video }
+          pcie: { get_input: pcie }
         cloudinit: { get_attribute: [cloudinit, cloud_config] }
-        iso_files: []
-        boot_order: []
+        iso_files: { get_input: iso_files }
+        boot_order: { get_input: boot_order }
         additional_disks: { get_input: additional_disks }
     relationships:
        - type: dell.relationships.depends_on
          target: cloudinit
+       - type: dell.relationships.depends_on
+         target: format_serial_ports
 
   vm_info:
     type: dell.nodes.Root

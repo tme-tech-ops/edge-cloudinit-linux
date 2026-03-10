@@ -106,3 +106,15 @@ The VM defenitions provide complex configuration presented in a simplified UI us
 - `vm/outputs.yaml` — Added `proxy_target_id` capability
 - `multi-node/child-blueprint/vm/outputs.yaml` — Added `proxy_target_id` capability
 - `scratch/blueprint_reference/object-tech-ops/tech-ops/definitions.yaml` — Changed all 6 `proxy_settings` blocks from `service_tag`-based auto-resolution to `auto_resolve: false` + `target_id: { get_environment_capability: proxy_target_id }`
+
+# PHASE 6 - Add Device Passthrough Inputs for Additional VMs
+
+**Problem:** The child blueprint already supported USB, serial port, GPU, video, and PCIe host/device passthrough inputs (including a `format_serial_ports` node for serial port transformation), but the upstream `add_vm` ServiceComponent did not pass these inputs through. Additional VMs could not use device passthrough.
+
+**Solution:** Added a unified `add_vm_passthrough_config` data type with a `device_type` discriminator field (`usb`, `serial_port`, `gpu`, `video`, `pcie`), following the `add_vm_add_disks` vm_name-correlation pattern. Each list entry represents one device for one VM. The `prepare_additional_vm.py` script filters entries by `vm_name` and groups by `device_type` to build per-type device lists, which are passed through the ServiceComponent to the child blueprint.
+
+**Files changed/added:**
+- `multi-node/inputs.yaml` — Added `add_vm_passthrough` boolean toggle, `add_vm_passthrough_devices` list input (item_type: `add_vm_passthrough_config`), and `add_vm_passthrough_config` data type (vm_name, device_type, device)
+- `multi-node/scripts/prepare_additional_vm.py` — Added `build_passthrough_devices()` helper that groups entries by device_type; filters passthrough entries by vm_name per instance; sets `usb`, `serial_port`, `gpu`, `video`, `pcie` runtime properties
+- `multi-node/definitions.yaml` — Passes `add_vm_passthrough_devices` input to prep script; passes all 5 device-type lists from `add_vm_prep_config` to the child ServiceComponent
+- `edge-cloudinit-linux.yaml` — Added `add_vm_passthrough` and `add_vm_passthrough_devices` to `multi_node` input group
