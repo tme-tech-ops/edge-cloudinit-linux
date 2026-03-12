@@ -256,17 +256,13 @@ if __name__ == "__main__":
     hashed_vm_passwd = inputs.get('hashed_vm_passwd', '')
     vm_user_name = inputs.get('vm_user_name', 'edgeuser')
 
-    # Calculate and set the additional VM count as runtime property
-    additional_vm_count = len(additional_vm)
-    ctx.instance.runtime_properties['additional_vm_count'] = additional_vm_count
-
     my_index = get_instance_index()
 
     if my_index >= len(additional_vm):
         raise NonRecoverableError(
             f"Instance index {my_index} exceeds additional_vm list "
-            f"length {len(additional_vm)}. The number of VM instances is "
-            f"automatically calculated from the additional_vm list length."
+            f"length {len(additional_vm)}. Ensure additional_server_count "
+            f"matches the number of entries in additional_vm."
         )
 
     vm_config = additional_vm[my_index]

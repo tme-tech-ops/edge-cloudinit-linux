@@ -203,7 +203,8 @@ Deploy additional VMs alongside the base VM. Each additional VM can be deployed 
 
 | Display Name | Input Name | Type | Default | Description |
 |---|---|---|---|---|
-| Additional VM Configurations | `additional_vm` | List | `[]` | List of additional VM configurations. Each entry defines a VM with per-VM settings. The number of VM instances is automatically calculated from this list. |
+| Number of Additional VMs | `additional_server_count` | Integer | `0` | Number of additional VMs to deploy (0-9). Must match entries in Additional VM Configurations. |
+| Additional VM Configurations | `additional_vm` | List | `[]` | List of additional VM configurations. Each entry defines a VM with per-VM settings. |
 | Add NICs to Additional VMs | `add_vm_nics` | Boolean | `false` | Enable additional network interfaces for additional VMs |
 | Additional VM NICs | `add_vm_add_nics` | List | `[]` | Network interface configurations for additional VMs |
 | Add Disks to Additional VMs | `add_vm_disks` | Boolean | `false` | Enable additional virtual disks for additional VMs |
@@ -324,7 +325,7 @@ The blueprint supports deploying multiple VMs from a single deployment, enabling
 
 ### Overview
 
-Deploy a base VM plus up N additional VMs with the following capabilities:
+Deploy a base VM plus up to 9 additional VMs with the following capabilities:
 
 - **Cross-Endpoint Deployment**: Each additional VM can be deployed on different NativeEdge Endpoints
 - **Independent Configuration**: Per-VM resource allocation, networking, and storage settings
@@ -350,11 +351,10 @@ Resources are correlated with VMs using the following mechanisms:
 
 The blueprint uses a scaling policy with the following parameters:
 
-- **Default Instances**: Automatically calculated from the length of `additional_vm` list
+- **Default Instances**: Controlled by `additional_server_count` input (0-9)
 - **Minimum Instances**: 0 (no additional VMs)
+- **Maximum Instances**: 9 (maximum additional VMs)
 - **Target Group**: `add_vm_group` (includes VM preparation and deployment components)
-
-The number of VM instances is dynamically determined by the number of entries in the `additional_vm` configuration list, eliminating the need for manual count management.
 
 ### Deployment Order
 
@@ -381,6 +381,7 @@ When deploying VMs across multiple endpoints:
 Deploy a single VM with basic configuration:
 
 ```yaml
+additional_server_count: 0
 vm_name: "edge-cloud-init-01"
 vm_hostname: "edgehost"
 vcpus: 2
@@ -395,6 +396,7 @@ use_dhcp: true
 Deploy base VM plus 2 additional VMs on the same endpoint:
 
 ```yaml
+additional_server_count: 2
 additional_vm:
   - ece_service_tag: "endpoint-001"
     vm_name: "edge-cloud-init-02"
@@ -494,4 +496,4 @@ add_vm_passthrough_devices:
 - **Multi-VM Considerations**: Each additional VM requires a unique `vm_name` within the deployment. VM names are used as correlation keys for NICs, disks, and passthrough devices.
 - **Resource Planning**: Ensure target endpoints have sufficient resources for all planned VMs, especially when deploying multiple VMs with high resource requirements.
 - **Network Segments**: Verify that all required network segments exist on target endpoints before deploying multi-VM configurations.
-- **Automatic Scaling**: The number of VM instances is automatically calculated from the `additional_vm` list length. For larger deployments, consider multiple blueprint deployments.
+- **Scaling Limits**: The maximum number of additional VMs is 9. For larger deployments, consider multiple blueprint deployments.

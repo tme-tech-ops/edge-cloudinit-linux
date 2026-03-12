@@ -99,7 +99,7 @@ policies:
   add_vm_scaling:
     type: dell.policies.scaling
     properties:
-      default_instances: { get_attribute: [add_vm_prep_config, additional_vm_count] }
+      default_instances: { get_input: additional_server_count }
       min_instances: 0
-      max_instances: { get_attribute: [add_vm_prep_config, additional_vm_count] }
+      max_instances: 9
     targets: [add_vm_group]
