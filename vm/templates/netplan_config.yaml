@@ -11,8 +11,7 @@ network:
         addresses: {{ dns }} {% endif %} {% if use_gateway %}
       routes:
         - to: default
-          via: {{ gateway }} {% endif %} {% endif %}
-{% for nic in additional_nics %}
+          via: {{ gateway }} {% endif %} {% endif %} {% for nic in vm_add_nics %}
     {{ nic.interface }}:
       dhcp-identifier: mac
       dhcp4: {{ nic.use_dhcp }} {% if nic.use_dhcp and not nic.accept_dhcp_routes %}
@@ -24,8 +23,7 @@ network:
         addresses: {{ nic.dns }} {% endif %} {% if nic.use_gateway %}
       routes:
         - to: {{ nic.route_destination }}
-          via: {{ nic.gateway }} {% endif %} {% endif %}
-{% endfor %}
+          via: {{ nic.gateway }} {% endif %} {% endif %} {% endfor %}
     {{ mgmt_interface }}:
       dhcp4: true
       dhcp4-overrides:

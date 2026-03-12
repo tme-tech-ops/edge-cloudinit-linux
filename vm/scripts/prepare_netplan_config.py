@@ -17,7 +17,7 @@ if not parameters.get("use_dhcp"):
             'Primary NIC: if DHCP not used, static_ip must be provided.')
 
 # Build additional NIC configs for the template
-additional_nics_raw = parameters.get("additional_nics", [])
+additional_nics_raw = parameters.get("vm_add_nics", [])
 additional_nics = []
 for idx, nic in enumerate(additional_nics_raw):
     nic_config = {
@@ -75,7 +75,7 @@ template_vars = {
     'gateway': parameters.get('gateway'),
     'use_dns': parameters.get('use_dns'),
     'dns': parameters.get('dns'),
-    'additional_nics': additional_nics,
+    'vm_add_nics': additional_nics,
     'mgmt_interface': mgmt_interface,
 }
 

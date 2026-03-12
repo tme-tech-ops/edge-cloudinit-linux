@@ -1,0 +1,434 @@
+inputs:
+
+  additional_server_count:
+    type: integer
+    hidden: false
+    allow_update: false
+    display_label: Number of Additional VMs
+    description: |
+      Number of additional VMs to deploy.
+      Must match the number of entries in the Additional VM Configurations list.
+    default: 0
+    constraints:
+      - in_range: [0, 9]
+    display:
+      group: multi_node
+      index: 5
+
+
+
+  additional_vm:
+    type: list
+    item_type: add_vm_config
+    hidden: false
+    allow_update: false
+    display_label: Additional VM Configurations
+    description: |
+      List of additional VM configurations.
+      Each entry defines a VM to deploy on a NativeEdge endpoint.
+      The number of entries must match the Additional Server Count.
+    required: false
+    default: []
+    display:
+      group: multi_node
+      index: 10
+
+  add_vm_nics:
+    type: boolean
+    hidden: false
+    display_label: Add NICs to Additional VMs
+    description: |
+      Check to add additional network interfaces to Additional VMs.
+      Use the Endpoint Service Tag to correlate NICs with VM entries.
+    default: false
+    display:
+      group: multi_node
+      index: 15
+
+  add_vm_add_nics:
+    type: list
+    item_type: add_vm_add_nic_config
+    hidden: false
+    allow_update: false
+    only_with: add_vm_nics
+    display_label: Additional VM NICs
+    description: >
+      List of additional NIC configs for Additional VMs.
+      Use the Endpoint Service Tag to associate each NIC with a VM.
+    required: false
+    default: []
+    display:
+      group: multi_node
+      index: 20
+
+  add_vm_disks:
+    type: boolean
+    hidden: false
+    display_label: Add Disks to Additional VMs
+    description: |
+      Check to add additional virtual disks to Additional VMs.
+      Use the Endpoint Service Tag to correlate disks with VM entries.
+    default: false
+    display:
+      group: multi_node
+      index: 25
+
+  add_vm_add_disks:
+    type: list
+    item_type: add_vm_add_disks
+    hidden: false
+    allow_update: false
+    only_with: add_vm_disks
+    display_label: Additional VM Disks
+    description: >
+      List of additional disk configs for Additional VMs.
+      Use the Endpoint Service Tag to associate each disk with a VM.
+    required: false
+    default: []
+    display:
+      group: multi_node
+      index: 30
+
+  add_vm_passthrough:
+    type: boolean
+    hidden: false
+    display_label: Add Passthrough Devices to Additional VMs
+    description: |
+      Check to add host/device passthrough (USB, Serial Port, GPU, Video, PCIe)
+      to additional Virtual Machines.
+      Use the VM Name to correlate devices with VM entries.
+    default: false
+    display:
+      group: multi_node
+      index: 35
+
+  add_vm_passthrough_devices:
+    type: list
+    item_type: add_vm_passthrough_config
+    hidden: false
+    allow_update: false
+    only_with: add_vm_passthrough
+    display_label: Additional VM Passthrough Devices
+    description: >
+      List of passthrough device entries for Additional VMs.
+      Use the VM Name to associate each device with a VM.
+    required: false
+    default: []
+    display:
+      group: multi_node
+      index: 40
+
+data_types:
+  add_vm_config:
+    properties:
+      ece_service_tag:
+        type: string
+        required: true
+        description: >
+          Service tag of the NativeEdge Endpoint where this VM will be deployed.
+        display:
+          index: 1
+          display_name: Endpoint Service Tag
+      vm_name:
+        type: string
+        required: true
+        description: Name of the Virtual Machine.
+        default: 'edge-cloud-init-02'
+        display:
+          index: 2
+          display_name: VM Name
+      vm_hostname:
+        type: string
+        required: true
+        default: 'edgehost2'
+        description: >
+          Hostname of the Virtual Machine.
+          Letters (a-z, A-Z), numbers (0-9), or hyphens (-). Max 63 characters.
+        display:
+          index: 3
+          display_name: VM Hostname
+      vcpus:
+        type: integer
+        required: true
+        default: 2
+        description: Number of virtual CPUs allocated to the VM.
+        display:
+          index: 4
+          display_name: vCPUs
+      memory_size:
+        type: string
+        required: true
+        default: '4GB'
+        description: Memory size with unit [KB,MB,GB,TB,PB,EB,ZB,YB].
+        display:
+          index: 5
+          display_name: Memory Size
+      os_disk_size:
+        type: string
+        required: true
+        default: '50GB'
+        description: OS Disk size with unit [KB,MB,GB,TB,PB,EB,ZB,YB].
+        display:
+          index: 6
+          display_name: OS Disk Size
+      disk:
+        type: string
+        required: true
+        default: '/DataStore0'
+        description: >
+          Datastore path on the target Endpoint. (e.g. /DataStore0)
+        display:
+          index: 7
+          display_name: Datastore Path
+      segment_name:
+        type: string
+        required: true
+        description: >
+          Virtual Network Segment name for the primary NIC.
+        display:
+          index: 8
+          display_name: Primary Network Segment
+      use_dhcp:
+        type: boolean
+        required: true
+        default: true
+        description: Use DHCP for the primary NIC. If false, static_ip is required.
+        display:
+          index: 9
+          display_name: Use DHCP
+      static_ip:
+        type: string
+        required: false
+        default: ''
+        description: Static IP in CIDR notation (e.g. 192.168.0.100/24).
+        display:
+          index: 10
+          display_name: Static IP/CIDR
+      use_gateway:
+        type: boolean
+        required: false
+        default: false
+        description: >
+          Configure a default gateway for the primary NIC.
+          Requires gateway when enabled.
+        display:
+          index: 11
+          display_name: Use Gateway
+      gateway:
+        type: string
+        required: false
+        default: ''
+        description: Gateway IP address (e.g. 192.168.0.1).
+        display:
+          index: 12
+          display_name: Gateway
+      use_dns:
+        type: boolean
+        required: false
+        default: false
+        description: Configure DNS servers for the primary NIC.
+        display:
+          index: 13
+          display_name: Use DNS
+      dns:
+        type: string
+        required: false
+        default: ''
+        description: Comma-separated DNS server IPs (e.g. 8.8.8.8,8.8.4.4).
+        display:
+          index: 14
+          display_name: DNS Servers
+
+  add_vm_add_nic_config:
+    properties:
+      vm_name:
+        type: string
+        required: true
+        description: >
+          VM Name to correlate this NIC with an additional VM entry.
+        display:
+          index: 1
+          display_name: VM Name
+      nic_name:
+        type: string
+        required: true
+        default: 'nic2'
+        description: >
+          A unique label for this NIC entry (e.g. "NIC 2").
+        display:
+          index: 2
+          display_name: NIC Label
+      segment_name:
+        type: string
+        required: true
+        default: ''
+        description: >
+          Name of the Virtual Network Segment to attach this NIC to.
+        display:
+          index: 3
+          display_name: Segment Name
+      use_dhcp:
+        type: boolean
+        required: true
+        default: true
+        description: Use DHCP for this NIC. If false, static_ip is required.
+        display:
+          index: 4
+          display_name: Use DHCP
+      accept_dhcp_routes:
+        type: boolean
+        required: false
+        default: false
+        description: >
+          When DHCP is enabled, accept gateway and routes from the DHCP server.
+          Default is false (only the primary NIC's DHCP gateway is used).
+        display:
+          index: 5
+          display_name: Accept DHCP Routes
+      static_ip:
+        type: string
+        required: false
+        default: ''
+        description: >
+          Static IP Address and CIDR prefix (e.g. 192.168.0.100/24).
+          Required when Use DHCP is false.
+        display:
+          index: 6
+          display_name: Static IP/CIDR
+      use_gateway:
+        type: boolean
+        required: false
+        default: false
+        description: >
+          Configure a static route for this NIC.
+          Requires gateway and route_destination when enabled.
+        display:
+          index: 7
+          display_name: Use Gateway
+      gateway:
+        type: string
+        required: false
+        default: ''
+        description: Gateway IP address (e.g. 192.168.0.1).
+        display:
+          index: 8
+          display_name: Gateway IP
+      route_destination:
+        type: string
+        required: false
+        default: ''
+        description: >
+          Destination subnet in CIDR for static route (e.g. 10.20.0.0/16).
+          Required when Use Gateway is true. Do NOT use 0.0.0.0/0 --
+          only the primary NIC should have a default route.
+        display:
+          index: 9
+          display_name: Route Destination (CIDR)
+      use_dns:
+        type: boolean
+        required: false
+        default: false
+        description: Configure DNS servers for this NIC.
+        display:
+          index: 10
+          display_name: Use DNS
+      dns:
+        type: string
+        required: false
+        default: ''
+        description: >
+          Comma-separated list of DNS server IPs (e.g. 8.8.8.8,8.8.4.4).
+        display:
+          index: 11
+          display_name: DNS Servers
+      use_nat:
+        type: boolean
+        required: false
+        default: false
+        description: Enable NAT port forwarding for this NIC.
+        display:
+          index: 12
+          display_name: Enable NAT
+      port_forward_rules:
+        type: string
+        required: false
+        default: ''
+        description: >
+          JSON-formatted port forwarding rules as a string.
+        display:
+          index: 13
+          display_name: Port Forward Rules (JSON)
+
+  add_vm_add_disks:
+    properties:
+      vm_name:
+        type: string
+        required: true
+        description: >
+          VM Name to correlate this disk with an additional VM entry.
+        display:
+          index: 1
+          display_name: VM Name
+      name:
+        type: string
+        required: true
+        default: 'vdisk2'
+        description: Unique name to identify the virtual disk.
+        display:
+          index: 2
+          display_name: Name
+      disk:
+        type: string
+        required: true
+        default: '/DataStore0'
+        description: The /DataStore path where the virtual disk will be created.
+        display:
+          index: 3
+          display_name: Disk Path
+      storage:
+        type: integer
+        required: true
+        default: 16
+        description: The size of the virtual disk, specified as an integer value.
+        display:
+          index: 4
+          display_name: Storage Size
+      storage_unit:
+        type: string
+        required: true
+        default: 'GB'
+        description: The unit of measurement for the disk size.
+        display:
+          index: 5
+          display_name: Storage Unit
+        constraints:
+          - valid_values: [ KB, MB, GB, TB, PB, EB, ZB, YB ]
+
+  add_vm_passthrough_config:
+    properties:
+      vm_name:
+        type: string
+        required: true
+        description: >
+          VM Name to correlate this passthrough device with an additional VM entry.
+        display:
+          index: 1
+          display_name: VM Name
+      device_type:
+        type: string
+        required: true
+        description: Type of passthrough device.
+        display:
+          index: 2
+          display_name: Device Type
+        constraints:
+          - valid_values: [usb, serial_port, gpu, video, pcie]
+      device:
+        type: string
+        required: true
+        description: >
+          Device logical name or identifier.
+          For serial ports, use PORT_MODE format (e.g. COM-1_RS-232).
+        display:
+          index: 3
+          display_name: Device

@@ -2,7 +2,7 @@ inputs:
 
 ### User Defined Inputs ###
 
-## Deployment Artifact 
+## Basic Configuration 
   edge_os_image_secret:
     type: secret_key
     hidden: false
@@ -14,7 +14,7 @@ inputs:
     constraints:
     - type: binary_configuration
     display:
-      group: artifacts
+      group: basic_vm
       index: 1
 
   os_type:
@@ -37,10 +37,20 @@ inputs:
         - "SUSE-SLES15"
         - "LINUX-OTHER"
     display:
-      group: artifacts
+      group: basic_vm
       index: 5
 
-## Virtual Machine Configuration
+  utility_blueprint_id:
+    type: string
+    hidden: false
+    display_label: Utility VM Blueprint Name
+    description: >
+      Name of the uploaded edge-cloudinit Utility blueprint.
+      Used for both the base VM and additional VM deployments.
+    default: edge-cloudinit-utility-vm
+    display:
+      group: basic_vm
+      index: 10
 
   vm_name:
     type: string
@@ -50,8 +60,8 @@ inputs:
       Name of the Virtual Machine
     default: edge-cloud-init-01
     display:
-      group: vm
-      index: 1
+      group: basic_vm
+      index: 15
 
   vm_hostname:
     type: string
@@ -70,8 +80,8 @@ inputs:
     - max_length: 64
     default: edgehost
     display:
-      group: vm
-      index: 5
+      group: basic_vm
+      index: 20
 
   vm_user_name:
     type: string
@@ -86,8 +96,8 @@ inputs:
     - pattern: ^(?!\s)(?!.*\s$).*$
       error_message: Cannot contain leading or trailing spaces.
     display:
-      group: vm
-      index: 10
+      group: basic_vm
+      index: 25
   
   vm_password:
     type: secret_key
@@ -99,43 +109,12 @@ inputs:
     constraints:
     - type: password
     display:
-      group: vm
-      index: 15
-  
-# Resource inputs
-
-  vcpus:
-    type: integer
-    hidden: false
-    allow_update: true
-    display_label: vCPUs
-    description: Number of virtual CPUs allocated to the Virtual Machine.
-    default: 2
-    constraints:
-    - greater_or_equal: 2
-    display:
-      group: vm
-      index: 20
-
-  memory_size:
-    type: string
-    hidden: false
-    allow_update: true
-    display_label: Memory Size
-    description: Memory size with unit [KB,MB,GB,TB,PB,EB,ZB,YB].
-    default: 4GB
-    constraints:
-    - pattern: '\d+(\.\d+)?(KB|MB|GB|TB|PB|EB|ZB|YB)'
-      error_message: |
-        Incorrect format.
-        Memory size must be followed by unit [KB,MB,GB,TB,PB,EB,ZB,YB].
-        Example: 4GB
-    display:
-      group: vm
-      index: 25
+      group: basic_vm
+      index: 30
 
   disk_wrapper:
     type: string
+    hidden: false
     display_label: Endpoint DataStore Path
     required: true
     allow_update: false
@@ -148,72 +127,9 @@ inputs:
             - get_inventory:
                 get_environment_capability: ece_service_tag
     display:
-      group: vm
-      index: 30
-
-  os_disk_size:
-    type: string
-    hidden: false
-    allow_update: true
-    display_label: OS Disk Size
-    description: Storage size with unit [KB,MB,GB,TB,PB,EB,ZB,YB].
-    default: 50GB
-    required: true
-    constraints:
-    - pattern: '\d+(\.\d+)?(KB|MB|GB|TB|PB|EB|ZB|YB)'
-      error_message: |
-        Incorrect format.
-        Disk size must be followed by unit [KB,MB,GB,TB,PB,EB,ZB,YB].
-        Example: 50GB
-    display:
-      group: vm
+      group: basic_vm
       index: 35
-
-  disk_controller:
-    type: string
-    display_label: Disk controller
-    allow_update: true
-    description: >
-      Deployment disk controller.
-    default: VIRTIO
-    hidden: false
-    constraints:
-      - valid_values:
-          - 'VIRTIO'
-          - 'SATA'
-          - 'SCSI'
-    display:
-      group: vm
-      index: 40
-
-  add_disks:
-    type: boolean
-    hidden: false
-    allow_update: false
-    display_label: Add Disks
-    description: |
-      Check to add a list of additional disks
-    default: false
-    display:
-      group: vm
-      index: 45
-
-  additional_disks:
-    type: list
-    item_type: additional_disks
-    hidden: false
-    allow_update: false
-    only_with: add_disks
-    display_label: Optional list of additional Virtual Disks
-    description: >
-      List of additional virtual disks to be created.
-    required: false
-    default: []
-    display:
-      group: vm
-      index: 45
-
-# Network inputs
+  
   vnic_0_segment_name:
     type: string
     hidden: false
@@ -228,8 +144,8 @@ inputs:
         - get_inventory:
             get_environment_capability: ece_service_tag
     display:
-      group: vm
-      index: 50
+      group: basic_vm
+      index: 40
 
   use_dhcp:
     type: boolean
@@ -239,8 +155,8 @@ inputs:
       If false, then static ip must be configured with optional DNS and Gateway.
     default: true
     display:
-      group: vm
-      index: 55
+      group: basic_vm
+      index: 45
 
   static_ip:
     type: string
@@ -257,8 +173,8 @@ inputs:
         Example: 172.16.0.1/16
     required: false
     display:
-      group: vm
-      index: 60
+      group: basic_vm
+      index: 50
 
   use_gateway:
     type: boolean
@@ -269,8 +185,8 @@ inputs:
       If false, Gateway will not be configured
     default: false
     display:
-      group: vm
-      index: 65
+      group: basic_vm
+      index: 55
 
   gateway:
     type: string
@@ -285,8 +201,8 @@ inputs:
         Invalid format for IP Address.
         Example: 172.16.0.1
     display:
-      group: vm
-      index: 70
+      group: basic_vm
+      index: 60
 
   use_dns:
     type: boolean
@@ -297,8 +213,8 @@ inputs:
       If false, DNS will not be configured
     default: false
     display:
-      group: vm
-      index: 75
+      group: basic_vm
+      index: 65
 
   dns:
     type: list
@@ -309,76 +225,10 @@ inputs:
     required: false
     default: []
     display:
-      group: vm
-      index: 80
- 
-  use_nat:
-    type: boolean
-    hidden: false
-    display_label: Enable NAT Port Forwarding
-    description: |
-      Enable to define NAT Port Forwarding rules (Only use with NAT Segment)
-    default: false
-    display:
-      group: vm
-      index: 85
+      group: basic_vm
+      index: 70
 
-  port_forward_rules:
-    type: list
-    hidden: false
-    only_with: use_nat
-    item_type: port_forward_rules
-    description: |
-      Leave vm_ip blank and fill in host_ip, vm_port, protocol, host_port, and service_type
-      Example for SSH: {host_ip:IP_OF_NAT Interface,vm_port:22,protocol:TCP,host_port:9999,service_type:SSH} 
-    required: false
-    display_label: Port Mapping
-    default: []
-    display:
-      group: vm
-      index: 90
-
-  add_nics:
-    type: boolean
-    hidden: false
-    display_label: Add Network Interfaces
-    description: |
-      Check to add list of additional network interfaces
-    default: false
-    display:
-      group: vm
-      index: 95
-
-  additional_nics:
-    type: list
-    item_type: additional_nics
-    hidden: false
-    allow_update: false
-    only_with: add_nics
-    display_label: Additional Network Interfaces
-    description: >
-      List of additional NICs (up to 9) beyond the primary NIC.
-      Each NIC requires a segment name and network configuration.
-    required: false
-    default: []
-    display:
-      group: vm
-      index: 100
-
-## Advanced Options
-
-  hardware_options.secure_boot:
-    type: boolean
-    hidden: false
-    allow_update: false
-    required: false
-    display_label: Secure Boot
-    description: |
-      Enable secure boot.
-    default: false
-    display:
-      group: adv_opt
-      index: 1
+## Advanced Virtual Machine Configuration
 
   hardware_options.firmware_type:
     type: string
@@ -391,7 +241,20 @@ inputs:
     constraints:
       - valid_values: [BIOS, UEFI]
     display:
-      group: adv_opt
+      group: adv_vm
+      index: 1
+
+  hardware_options.secure_boot:
+    type: boolean
+    hidden: false
+    allow_update: false
+    required: false
+    display_label: Secure Boot
+    description: |
+      Enable secure boot.
+    default: false
+    display:
+      group: adv_vm
       index: 5
 
   hardware_options.vTPM:
@@ -405,10 +268,154 @@ inputs:
       Typically required for Secure Boot.
     default: false
     display:
-      group: adv_opt
+      group: adv_vm
       index: 10
 
-# Passthrough device inputs
+  vcpus:
+    type: integer
+    hidden: false
+    allow_update: true
+    display_label: vCPUs
+    description: Number of virtual CPUs allocated to the Virtual Machine.
+    default: 2
+    constraints:
+    - greater_or_equal: 2
+    display:
+      group: adv_vm
+      index: 15
+
+  memory_size:
+    type: string
+    hidden: false
+    allow_update: true
+    display_label: Memory Size
+    description: Memory size with unit [KB,MB,GB,TB,PB,EB,ZB,YB].
+    default: 4GB
+    constraints:
+    - pattern: '\d+(\.\d+)?(KB|MB|GB|TB|PB|EB|ZB|YB)'
+      error_message: |
+        Incorrect format.
+        Memory size must be followed by unit [KB,MB,GB,TB,PB,EB,ZB,YB].
+        Example: 4GB
+    display:
+      group: adv_vm
+      index: 20
+
+  os_disk_size:
+    type: string
+    hidden: false
+    allow_update: true
+    display_label: OS Disk Size
+    description: Storage size with unit [KB,MB,GB,TB,PB,EB,ZB,YB].
+    default: 50GB
+    required: true
+    constraints:
+    - pattern: '\d+(\.\d+)?(KB|MB|GB|TB|PB|EB|ZB|YB)'
+      error_message: |
+        Incorrect format.
+        Disk size must be followed by unit [KB,MB,GB,TB,PB,EB,ZB,YB].
+        Example: 50GB
+    display:
+      group: adv_vm
+      index: 25
+
+  disk_controller:
+    type: string
+    display_label: Disk controller
+    allow_update: true
+    description: >
+      Deployment disk controller.
+    default: VIRTIO
+    hidden: false
+    constraints:
+      - valid_values:
+          - 'VIRTIO'
+          - 'SATA'
+          - 'SCSI'
+    display:
+      group: adv_vm
+      index: 30
+
+  add_disks:
+    type: boolean
+    hidden: false
+    allow_update: false
+    display_label: Add Disks
+    description: |
+      Check to add a list of additional disks
+    default: false
+    display:
+      group: adv_vm
+      index: 35
+
+  additional_disks:
+    type: list
+    item_type: additional_disks
+    hidden: false
+    allow_update: false
+    only_with: add_disks
+    display_label: Optional list of additional Virtual Disks
+    description: >
+      List of additional virtual disks to be created.
+    required: false
+    default: []
+    display:
+      group: adv_vm
+      index: 40
+ 
+  use_nat:
+    type: boolean
+    hidden: false
+    display_label: Enable NAT Port Forwarding
+    description: |
+      Enable to define NAT Port Forwarding rules (Only use with NAT Segment)
+    default: false
+    display:
+      group: adv_vm
+      index: 45
+
+  port_forward_rules:
+    type: list
+    hidden: false
+    only_with: use_nat
+    item_type: port_forward_rules
+    description: |
+      Leave vm_ip blank and fill in host_ip, vm_port, protocol, host_port, and service_type
+      Example for SSH: {host_ip:IP_OF_NAT Interface,vm_port:22,protocol:TCP,host_port:9999,service_type:SSH} 
+    required: false
+    display_label: Port Mapping
+    default: []
+    display:
+      group: adv_vm
+      index: 50
+
+  add_nics:
+    type: boolean
+    hidden: false
+    display_label: Add Network Interfaces
+    description: |
+      Check to add list of additional network interfaces
+    default: false
+    display:
+      group: adv_vm
+      index: 55
+
+  vm_add_nics:
+    type: list
+    item_type: vm_add_nics
+    hidden: false
+    allow_update: false
+    only_with: add_nics
+    display_label: Additional Network Interfaces
+    description: >
+      List of additional NICs (up to 9) beyond the primary NIC.
+      Each NIC requires a segment name and network configuration.
+    required: false
+    default: []
+    display:
+      group: adv_vm
+      index: 60
+
   use_passthrough:
     type: boolean
     hidden: false
@@ -417,8 +424,8 @@ inputs:
       Uncheck to define usb, serial, gpu, video, and pcie devices for VM passthrough
     default: false
     display:
-      group: adv_opt
-      index: 15
+      group: adv_vm
+      index: 65
 
   usb_wrapper:
     type: list
@@ -438,30 +445,8 @@ inputs:
             get_environment_capability: ece_service_tag
     default: []
     display:
-      group: adv_opt
-      index: 20
-
-  serial_port_wrapper:
-    type: list
-    item_type: string
-    hidden: false
-    only_with: use_passthrough
-    allow_update: false
-    display_label: Serial Port
-    description: |
-      Serial port passthrough.
-      Please make sure to select the port where required device is connected.
-    required: false
-    default: []
-    constraints:
-      - valid_values:
-          jmespath:
-            - '[extra.hw_core.serialPorts[*].{"port":logicalName,"mode":`RS-232`}[*].values(@).join(`_`,@)[],extra.hw_core.serialPorts[*].{"port":logicalName,"mode":`RS-422`}[*].values(@).join(`_`,@)[],extra.hw_core.serialPorts[*].{"port":logicalName,"mode":`RS-485`}[*].values(@).join(`_`,@)[]][]'
-            - get_inventory:
-                get_environment_capability: ece_service_tag
-    display:
-      group: adv_opt
-      index: 25
+      group: adv_vm
+      index: 70
 
   gpu_wrapper:
     type: list
@@ -481,8 +466,28 @@ inputs:
             get_environment_capability: ece_service_tag
     default: []
     display:
-      group: adv_opt
-      index: 30
+      group: adv_vm
+      index: 75
+
+  pcie_wrapper:
+    type: list
+    item_type: string
+    display_label: PCIe Passthrough
+    hidden: false
+    only_with: use_passthrough
+    description: >
+      PCIe passthrough. A list of PCIe logical names.
+    required: false
+    constraints:
+    - valid_values:
+        jmespath:
+        - extra.hw_core.pciDevice[*].logicalName
+        - get_inventory:
+            get_environment_capability: ece_service_tag
+    default: []
+    display:
+      group: adv_vm
+      index: 80
 
   video:
     type: list
@@ -499,8 +504,8 @@ inputs:
         - "onboard controller"
     default: []
     display:
-      group: adv_opt
-      index: 35
+      group: adv_vm
+      index: 85
 
   # video: # CANNOT Use jmespath for video controllers, keeping for reference
   #   type: list
@@ -520,28 +525,29 @@ inputs:
   #           get_environment_capability: ece_service_tag
   #   default: []
   #   display:
-  #     group: adv_opt
-  #     index: 36
+  #     group: adv_vm
+  #     index: 116
 
-  pcie_wrapper:
+  serial_port_wrapper:
     type: list
     item_type: string
-    display_label: PCIe Passthrough
     hidden: false
     only_with: use_passthrough
-    description: >
-      PCIe passthrough. A list of PCIe logical names.
+    allow_update: false
+    display_label: Serial Port
+    description: |
+      Serial port passthrough. PORT_MODE format (e.g. COM-1_RS-232)
     required: false
-    constraints:
-    - valid_values:
-        jmespath:
-        - extra.hw_core.pciDevice[*].logicalName
-        - get_inventory:
-            get_environment_capability: ece_service_tag
     default: []
+    constraints:
+      - valid_values:
+          jmespath:
+            - '[extra.hw_core.serialPorts[*].{"port":logicalName,"mode":`RS-232`}[*].values(@).join(`_`,@)[],extra.hw_core.serialPorts[*].{"port":logicalName,"mode":`RS-422`}[*].values(@).join(`_`,@)[],extra.hw_core.serialPorts[*].{"port":logicalName,"mode":`RS-485`}[*].values(@).join(`_`,@)[]][]'
+            - get_inventory:
+                get_environment_capability: ece_service_tag
     display:
-      group: adv_opt
-      index: 40
+      group: adv_vm
+      index: 90
 
 ### Hidden inputs ###
 
@@ -758,7 +764,7 @@ data_types:
         type: string
         required: false
         description: VM IP, only needed when static IP is defined for the VM
-  additional_nics:
+  vm_add_nics:
     properties:
       nic_name:
         type: string
@@ -886,7 +892,7 @@ data_types:
       disk:
         type: string
         required: true
-        default: '/Datastore0'
+        default: '/DataStore0'
         description: The /DataStore path where the virtual disk will be created.
         display:
           index: 2

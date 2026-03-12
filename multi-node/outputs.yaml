@@ -1,0 +1,11 @@
+capabilities:
+
+  base_vm:
+    description: Base VM details
+    value:
+      get_attribute: [ vm_results, base_vm ]
+
+  additional_vm:
+    description: Additional VM details keyed by VM name
+    value:
+      get_attribute: [ vm_results, additional_vm ]

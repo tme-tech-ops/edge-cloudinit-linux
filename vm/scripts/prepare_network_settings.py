@@ -4,7 +4,7 @@ from nativeedge.state import ctx_parameters as inputs
 
 primary_segment = inputs.get('primary_segment')
 primary_port_forwards = inputs.get('primary_port_forwards', [])
-additional_nics = inputs.get('additional_nics', [])
+additional_nics = inputs.get('vm_add_nics', [])
 
 network_settings = []
 
