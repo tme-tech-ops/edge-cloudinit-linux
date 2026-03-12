@@ -1,22 +1,5 @@
 inputs:
 
-  additional_server_count:
-    type: integer
-    hidden: false
-    allow_update: false
-    display_label: Number of Additional VMs
-    description: |
-      Number of additional VMs to deploy.
-      Must match the number of entries in the Additional VM Configurations list.
-    default: 0
-    constraints:
-      - in_range: [0, 9]
-    display:
-      group: multi_node
-      index: 5
-
-
-
   additional_vm:
     type: list
     item_type: add_vm_config

@@ -99,7 +99,5 @@ policies:
   add_vm_scaling:
     type: dell.policies.scaling
     properties:
-      default_instances: { get_input: additional_server_count }
-      min_instances: 0
-      max_instances: 9
+      default_instances: { jmespath: ['length(@)', { get_input: additional_vm }] }
     targets: [add_vm_group]

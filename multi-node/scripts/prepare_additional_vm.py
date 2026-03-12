@@ -260,9 +260,7 @@ if __name__ == "__main__":
 
     if my_index >= len(additional_vm):
         raise NonRecoverableError(
-            f"Instance index {my_index} exceeds additional_vm list "
-            f"length {len(additional_vm)}. Ensure additional_server_count "
-            f"matches the number of entries in additional_vm."
+            f"Instance index {my_index} exceeds additional_vm list of {len(additional_vm)}."
         )
 
     vm_config = additional_vm[my_index]

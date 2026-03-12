@@ -203,7 +203,6 @@ Deploy additional VMs alongside the base VM. Each additional VM can be deployed 
 
 | Display Name | Input Name | Type | Default | Description |
 |---|---|---|---|---|
-| Number of Additional VMs | `additional_server_count` | Integer | `0` | Number of additional VMs to deploy (0-9). Must match entries in Additional VM Configurations. |
 | Additional VM Configurations | `additional_vm` | List | `[]` | List of additional VM configurations. Each entry defines a VM with per-VM settings. |
 | Add NICs to Additional VMs | `add_vm_nics` | Boolean | `false` | Enable additional network interfaces for additional VMs |
 | Additional VM NICs | `add_vm_add_nics` | List | `[]` | Network interface configurations for additional VMs |
@@ -351,9 +350,7 @@ Resources are correlated with VMs using the following mechanisms:
 
 The blueprint uses a scaling policy with the following parameters:
 
-- **Default Instances**: Controlled by `additional_server_count` input (0-9)
-- **Minimum Instances**: 0 (no additional VMs)
-- **Maximum Instances**: 9 (maximum additional VMs)
+- **Default Instances**: Dynamically set by the length of the `additional_vm` input list
 - **Target Group**: `add_vm_group` (includes VM preparation and deployment components)
 
 ### Deployment Order
@@ -381,7 +378,6 @@ When deploying VMs across multiple endpoints:
 Deploy a single VM with basic configuration:
 
 ```yaml
-additional_server_count: 0
 vm_name: "edge-cloud-init-01"
 vm_hostname: "edgehost"
 vcpus: 2
@@ -396,7 +392,6 @@ use_dhcp: true
 Deploy base VM plus 2 additional VMs on the same endpoint:
 
 ```yaml
-additional_server_count: 2
 additional_vm:
   - ece_service_tag: "endpoint-001"
     vm_name: "edge-cloud-init-02"
