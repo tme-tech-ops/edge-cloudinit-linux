@@ -1,20 +1,5 @@
 inputs:
 
-  additional_server_count:
-    type: integer
-    hidden: false
-    allow_update: false
-    display_label: Number of Additional VMs
-    description: |
-      Number of additional VMs to deploy.
-      Must match the number of entries in the Additional VM Configurations list.
-    default: 0
-    constraints:
-      - in_range: [0, 9]
-    display:
-      group: multi_node
-      index: 5
-
   additional_vm:
     type: list
     item_type: add_vm_config
@@ -24,12 +9,12 @@ inputs:
     description: |
       List of additional VM configurations.
       Each entry defines a VM to deploy on a NativeEdge endpoint.
-      The number of entries must match the Additional Server Count.
+      The number of VM instances is automatically calculated from this list.
     required: false
     default: []
     display:
       group: multi_node
-      index: 10
+      index: 5
 
   add_vm_nics:
     type: boolean
@@ -41,7 +26,7 @@ inputs:
     default: false
     display:
       group: multi_node
-      index: 15
+      index: 10
 
   add_vm_add_nics:
     type: list
@@ -57,7 +42,7 @@ inputs:
     default: []
     display:
       group: multi_node
-      index: 20
+      index: 15
 
   add_vm_disks:
     type: boolean
@@ -69,7 +54,7 @@ inputs:
     default: false
     display:
       group: multi_node
-      index: 25
+      index: 20
 
   add_vm_add_disks:
     type: list
@@ -85,7 +70,7 @@ inputs:
     default: []
     display:
       group: multi_node
-      index: 30
+      index: 25
 
   add_vm_passthrough:
     type: boolean
@@ -98,7 +83,7 @@ inputs:
     default: false
     display:
       group: multi_node
-      index: 35
+      index: 30
 
   add_vm_passthrough_devices:
     type: list
@@ -114,7 +99,7 @@ inputs:
     default: []
     display:
       group: multi_node
-      index: 40
+      index: 35
 
 data_types:
   add_vm_config:
