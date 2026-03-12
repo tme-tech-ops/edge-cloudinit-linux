@@ -63,7 +63,6 @@ input_groups:
     collapsible: true
     index: 2
     inputs:
-      - additional_server_count
       - additional_vm
       - add_vm_nics
       - add_vm_add_nics
