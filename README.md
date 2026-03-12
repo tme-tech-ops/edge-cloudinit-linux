@@ -6,15 +6,15 @@ This blueprint may be used standalone or as a target environment for the **tme-t
 
 ## Table of Contents
 
-[Supported Features](#supported-features)
-[Prerequisites](#prerequisites)
-[Secrets](#secrets)
-[Inputs](#inputs)
-[Outputs / Capabilities](#outputs--capabilities)
-[Network Interface Layout](#network-interface-layout)
-[Multi-VM Deployment](#multi-vm-deployment)
-[Usage Examples](#usage-examples)
-[Notes](#notes)
+[Supported Features](#supported-features)  
+[Prerequisites](#prerequisites)  
+[Secrets](#secrets)  
+[Inputs](#inputs)  
+[Outputs / Capabilities](#outputs--capabilities)  
+[Network Interface Layout](#network-interface-layout)  
+[Multi-VM Deployment](#multi-vm-deployment)  
+[Usage Examples](#usage-examples)  
+[Notes](#notes)  
 
 ---
 
