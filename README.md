@@ -4,6 +4,18 @@ A blueprint for the **Dell Automation Platform** that deploys a cloud-init Linux
 
 This blueprint may be used standalone or as a target environment for the **tme-tech-ops blueprint suite**.
 
+## Table of Contents
+
+[Supported Features](#supported-features)
+[Prerequisites](#prerequisites)
+[Secrets](#secrets)
+[Inputs](#inputs)
+[Outputs / Capabilities](#outputs--capabilities)
+[Network Interface Layout](#network-interface-layout)
+[Multi-VM Deployment](#multi-vm-deployment)
+[Usage Examples](#usage-examples)
+[Notes](#notes)
+
 ---
 
 ## Supported Features
