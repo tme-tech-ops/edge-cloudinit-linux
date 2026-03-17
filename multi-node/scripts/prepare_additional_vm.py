@@ -255,6 +255,11 @@ if __name__ == "__main__":
     ssh_public_key = inputs.get('ssh_public_key', '')
     hashed_vm_passwd = inputs.get('hashed_vm_passwd', '')
     vm_user_name = inputs.get('vm_user_name', 'edgeuser')
+    
+    if hashed_vm_passwd:
+        ctx.logger.info('Received hashed password from base VM configuration')
+    else:
+        ctx.logger.warning('No hashed password received from base VM - SSH password authentication may fail')
 
     my_index = get_instance_index()
 

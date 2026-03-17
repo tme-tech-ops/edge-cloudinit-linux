@@ -270,6 +270,8 @@ if __name__ == "__main__":
 
     # 3. Hash password
     hashed_passwd = hash_password(vm_password)
+    ctx.instance.runtime_properties['hashed_vm_passwd'] = hashed_passwd
+    ctx.logger.info('Password hashed and set as runtime property for multi-node VMs')
 
     # 4. Build cloud-init config
     cloudinit_config = build_cloudinit_config(
