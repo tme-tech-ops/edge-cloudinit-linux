@@ -9,7 +9,15 @@ imports:
   - vm/inputs.yaml
   - vm/outputs.yaml
   - multi-node/definitions.yaml
-  - multi-node/inputs.yaml
+  - multi-node/vm_2_inputs.yaml
+  - multi-node/vm_3_inputs.yaml
+  - multi-node/vm_4_inputs.yaml
+  - multi-node/vm_5_inputs.yaml
+  - multi-node/vm_6_inputs.yaml
+  - multi-node/vm_7_inputs.yaml
+  - multi-node/vm_8_inputs.yaml
+  - multi-node/vm_9_inputs.yaml
+  - multi-node/vm_10_inputs.yaml
   - multi-node/outputs.yaml
 
 input_groups:
