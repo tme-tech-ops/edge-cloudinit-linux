@@ -2,7 +2,30 @@ inputs:
 
 ### User Defined Inputs ###
 
-## Basic Configuration 
+## Basic Configuration
+
+  number_of_vms:
+    display_label: "Number of Virtual Machines to Create"
+    description: "Number of Virtual Machines to Create"
+    type: integer
+    required: true
+    default: 1
+    display:
+      group: basic_vm
+      index: 0
+    constraints:
+      - valid_values:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
+          - 7
+          - 8
+          - 9
+          - 10
+
   edge_os_image_secret:
     type: secret_key
     hidden: false

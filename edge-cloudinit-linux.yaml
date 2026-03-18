@@ -9,7 +9,15 @@ imports:
   - vm/inputs.yaml
   - vm/outputs.yaml
   - multi-node/definitions.yaml
-  - multi-node/inputs.yaml
+  - multi-node/vm_2_inputs.yaml
+  - multi-node/vm_3_inputs.yaml
+  - multi-node/vm_4_inputs.yaml
+  - multi-node/vm_5_inputs.yaml
+  - multi-node/vm_6_inputs.yaml
+  - multi-node/vm_7_inputs.yaml
+  - multi-node/vm_8_inputs.yaml
+  - multi-node/vm_9_inputs.yaml
+  - multi-node/vm_10_inputs.yaml
   - multi-node/outputs.yaml
 
 input_groups:
@@ -18,6 +26,7 @@ input_groups:
     collapsible: true
     index: 0
     inputs:
+      - number_of_vms
       - edge_os_image_secret
       - os_type
       - utility_blueprint_id
@@ -63,13 +72,258 @@ input_groups:
     collapsible: true
     index: 2
     inputs:
-      - additional_vm
-      - add_vm_nics
-      - add_vm_add_nics
-      - add_vm_disks
-      - add_vm_add_disks
-      - add_vm_passthrough
-      - add_vm_passthrough_devices
+      # VM 2
+      - deployment_id_02
+      - vm_2_name
+      - vm_2_hostname
+      - vm_2_vcpus
+      - vm_2_memory_size
+      - vm_2_os_disk_size
+      - vm_2_disk_controller
+      - vm_2_disk_wrapper
+      - vm_2_vnic_0_segment_name
+      - vm_2_use_dhcp
+      - vm_2_static_ip
+      - vm_2_use_gateway
+      - vm_2_gateway
+      - vm_2_use_dns
+      - vm_2_dns
+      - vm_2_use_nat
+      - vm_2_port_forward_rules
+      - vm_2_add_nics
+      - vm_2_vm_add_nics
+      - vm_2_add_disks
+      - vm_2_additional_disks
+      - vm_2_use_passthrough
+      - vm_2_usb_wrapper
+      - vm_2_gpu_wrapper
+      - vm_2_pcie_wrapper
+      - vm_2_video
+      - vm_2_serial_port_wrapper
+      # VM 3
+      - deployment_id_03
+      - vm_3_name
+      - vm_3_hostname
+      - vm_3_vcpus
+      - vm_3_memory_size
+      - vm_3_os_disk_size
+      - vm_3_disk_controller
+      - vm_3_disk_wrapper
+      - vm_3_vnic_0_segment_name
+      - vm_3_use_dhcp
+      - vm_3_static_ip
+      - vm_3_use_gateway
+      - vm_3_gateway
+      - vm_3_use_dns
+      - vm_3_dns
+      - vm_3_use_nat
+      - vm_3_port_forward_rules
+      - vm_3_add_nics
+      - vm_3_vm_add_nics
+      - vm_3_add_disks
+      - vm_3_additional_disks
+      - vm_3_use_passthrough
+      - vm_3_usb_wrapper
+      - vm_3_gpu_wrapper
+      - vm_3_pcie_wrapper
+      - vm_3_video
+      - vm_3_serial_port_wrapper
+      # VM 4
+      - deployment_id_04
+      - vm_4_name
+      - vm_4_hostname
+      - vm_4_vcpus
+      - vm_4_memory_size
+      - vm_4_os_disk_size
+      - vm_4_disk_controller
+      - vm_4_disk_wrapper
+      - vm_4_vnic_0_segment_name
+      - vm_4_use_dhcp
+      - vm_4_static_ip
+      - vm_4_use_gateway
+      - vm_4_gateway
+      - vm_4_use_dns
+      - vm_4_dns
+      - vm_4_use_nat
+      - vm_4_port_forward_rules
+      - vm_4_add_nics
+      - vm_4_vm_add_nics
+      - vm_4_add_disks
+      - vm_4_additional_disks
+      - vm_4_use_passthrough
+      - vm_4_usb_wrapper
+      - vm_4_gpu_wrapper
+      - vm_4_pcie_wrapper
+      - vm_4_video
+      - vm_4_serial_port_wrapper
+      # VM 5
+      - deployment_id_05
+      - vm_5_name
+      - vm_5_hostname
+      - vm_5_vcpus
+      - vm_5_memory_size
+      - vm_5_os_disk_size
+      - vm_5_disk_controller
+      - vm_5_disk_wrapper
+      - vm_5_vnic_0_segment_name
+      - vm_5_use_dhcp
+      - vm_5_static_ip
+      - vm_5_use_gateway
+      - vm_5_gateway
+      - vm_5_use_dns
+      - vm_5_dns
+      - vm_5_use_nat
+      - vm_5_port_forward_rules
+      - vm_5_add_nics
+      - vm_5_vm_add_nics
+      - vm_5_add_disks
+      - vm_5_additional_disks
+      - vm_5_use_passthrough
+      - vm_5_usb_wrapper
+      - vm_5_gpu_wrapper
+      - vm_5_pcie_wrapper
+      - vm_5_video
+      - vm_5_serial_port_wrapper
+      # VM 6
+      - deployment_id_06
+      - vm_6_name
+      - vm_6_hostname
+      - vm_6_vcpus
+      - vm_6_memory_size
+      - vm_6_os_disk_size
+      - vm_6_disk_controller
+      - vm_6_disk_wrapper
+      - vm_6_vnic_0_segment_name
+      - vm_6_use_dhcp
+      - vm_6_static_ip
+      - vm_6_use_gateway
+      - vm_6_gateway
+      - vm_6_use_dns
+      - vm_6_dns
+      - vm_6_use_nat
+      - vm_6_port_forward_rules
+      - vm_6_add_nics
+      - vm_6_vm_add_nics
+      - vm_6_add_disks
+      - vm_6_additional_disks
+      - vm_6_use_passthrough
+      - vm_6_usb_wrapper
+      - vm_6_gpu_wrapper
+      - vm_6_pcie_wrapper
+      - vm_6_video
+      - vm_6_serial_port_wrapper
+      # VM 7
+      - deployment_id_07
+      - vm_7_name
+      - vm_7_hostname
+      - vm_7_vcpus
+      - vm_7_memory_size
+      - vm_7_os_disk_size
+      - vm_7_disk_controller
+      - vm_7_disk_wrapper
+      - vm_7_vnic_0_segment_name
+      - vm_7_use_dhcp
+      - vm_7_static_ip
+      - vm_7_use_gateway
+      - vm_7_gateway
+      - vm_7_use_dns
+      - vm_7_dns
+      - vm_7_use_nat
+      - vm_7_port_forward_rules
+      - vm_7_add_nics
+      - vm_7_vm_add_nics
+      - vm_7_add_disks
+      - vm_7_additional_disks
+      - vm_7_use_passthrough
+      - vm_7_usb_wrapper
+      - vm_7_gpu_wrapper
+      - vm_7_pcie_wrapper
+      - vm_7_video
+      - vm_7_serial_port_wrapper
+      # VM 8
+      - deployment_id_08
+      - vm_8_name
+      - vm_8_hostname
+      - vm_8_vcpus
+      - vm_8_memory_size
+      - vm_8_os_disk_size
+      - vm_8_disk_controller
+      - vm_8_disk_wrapper
+      - vm_8_vnic_0_segment_name
+      - vm_8_use_dhcp
+      - vm_8_static_ip
+      - vm_8_use_gateway
+      - vm_8_gateway
+      - vm_8_use_dns
+      - vm_8_dns
+      - vm_8_use_nat
+      - vm_8_port_forward_rules
+      - vm_8_add_nics
+      - vm_8_vm_add_nics
+      - vm_8_add_disks
+      - vm_8_additional_disks
+      - vm_8_use_passthrough
+      - vm_8_usb_wrapper
+      - vm_8_gpu_wrapper
+      - vm_8_pcie_wrapper
+      - vm_8_video
+      - vm_8_serial_port_wrapper
+      # VM 9
+      - deployment_id_09
+      - vm_9_name
+      - vm_9_hostname
+      - vm_9_vcpus
+      - vm_9_memory_size
+      - vm_9_os_disk_size
+      - vm_9_disk_controller
+      - vm_9_disk_wrapper
+      - vm_9_vnic_0_segment_name
+      - vm_9_use_dhcp
+      - vm_9_static_ip
+      - vm_9_use_gateway
+      - vm_9_gateway
+      - vm_9_use_dns
+      - vm_9_dns
+      - vm_9_use_nat
+      - vm_9_port_forward_rules
+      - vm_9_add_nics
+      - vm_9_vm_add_nics
+      - vm_9_add_disks
+      - vm_9_additional_disks
+      - vm_9_use_passthrough
+      - vm_9_usb_wrapper
+      - vm_9_gpu_wrapper
+      - vm_9_pcie_wrapper
+      - vm_9_video
+      - vm_9_serial_port_wrapper
+      # VM 10
+      - deployment_id_10
+      - vm_10_name
+      - vm_10_hostname
+      - vm_10_vcpus
+      - vm_10_memory_size
+      - vm_10_os_disk_size
+      - vm_10_disk_controller
+      - vm_10_disk_wrapper
+      - vm_10_vnic_0_segment_name
+      - vm_10_use_dhcp
+      - vm_10_static_ip
+      - vm_10_use_gateway
+      - vm_10_gateway
+      - vm_10_use_dns
+      - vm_10_dns
+      - vm_10_use_nat
+      - vm_10_port_forward_rules
+      - vm_10_add_nics
+      - vm_10_vm_add_nics
+      - vm_10_add_disks
+      - vm_10_additional_disks
+      - vm_10_use_passthrough
+      - vm_10_usb_wrapper
+      - vm_10_gpu_wrapper
+      - vm_10_pcie_wrapper
+      - vm_10_video
+      - vm_10_serial_port_wrapper
 
 labels:
   csys-obj-type:
