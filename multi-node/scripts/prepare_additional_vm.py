@@ -24,6 +24,27 @@ def get_instance_index():
     )
 
 
+def get_service_tag_from_deployment(client, deployment_id):
+    """Resolve ece_service_tag capability from a deployment."""
+    try:
+        caps = client.deployments.capabilities.get(deployment_id)
+        cap_values = caps.get('capabilities', caps)
+        if isinstance(cap_values, dict) and 'ece_service_tag' in cap_values:
+            tag = cap_values['ece_service_tag']
+            if isinstance(tag, dict) and 'value' in tag:
+                return tag['value']
+            return tag
+        raise NonRecoverableError(
+            f"Deployment '{deployment_id}' does not have "
+            f"'ece_service_tag' capability."
+        )
+    except Exception as e:
+        raise NonRecoverableError(
+            f"Failed to get ece_service_tag from deployment "
+            f"'{deployment_id}': {e}"
+        )
+
+
 def build_network_settings(vm_config, add_nics):
     """Build network_settings list for primary NIC + additional NICs."""
     network_settings = []
@@ -34,10 +55,18 @@ def build_network_settings(vm_config, add_nics):
         raise NonRecoverableError(
             "segment_name is required for primary NIC (VNIC0)."
         )
-    network_settings.append({
+    primary_setting = {
         'name': 'VNIC0',
         'segment_name': segment_name
-    })
+    }
+
+    # Handle NAT port forwarding on primary NIC
+    if vm_config.get('use_nat', False):
+        pf_rules = vm_config.get('port_forward_rules', [])
+        if pf_rules:
+            primary_setting['port_fwd_rules'] = pf_rules
+
+    network_settings.append(primary_setting)
 
     # Additional NICs (VNIC1+)
     for idx, nic in enumerate(add_nics):
@@ -87,9 +116,9 @@ def build_netplan_yaml(vm_config, add_nics, mgmt_interface):
     use_gateway = vm_config.get('use_gateway', False)
     gateway = vm_config.get('gateway', '')
     use_dns = vm_config.get('use_dns', False)
-    dns_raw = vm_config.get('dns', '')
-    dns_list = [s.strip() for s in dns_raw.split(',') if s.strip()] \
-        if dns_raw else []
+    dns_list = vm_config.get('dns', [])
+    if isinstance(dns_list, str) and dns_list:
+        dns_list = [s.strip() for s in dns_list.split(',') if s.strip()]
 
     if not use_dhcp:
         if not static_ip:
@@ -177,23 +206,6 @@ def build_netplan_yaml(vm_config, add_nics, mgmt_interface):
     return base64.b64encode(netplan_yaml.encode('utf-8')).decode('utf-8')
 
 
-def build_passthrough_devices(passthrough_entries):
-    """Group passthrough device entries by device_type, return per-type lists."""
-    result = {
-        'usb': [],
-        'serial_port': [],
-        'gpu': [],
-        'video': [],
-        'pcie': []
-    }
-    for entry in passthrough_entries:
-        dtype = entry.get('device_type', '')
-        device = entry.get('device', '')
-        if dtype in result and device:
-            result[dtype].append(device)
-    return result
-
-
 def build_additional_disks(add_disks):
     """Build additional_disks list for NativeEdgeVM node."""
     disks = []
@@ -248,62 +260,81 @@ def build_cloudinit_config(vm_hostname, vm_user_name, hashed_vm_passwd,
 
 
 if __name__ == "__main__":
-    additional_vm = inputs.get('additional_vm', [])
-    add_vm_add_nics = inputs.get('add_vm_add_nics', [])
-    add_vm_add_disks = inputs.get('add_vm_add_disks', [])
-    add_vm_passthrough_devices = inputs.get('add_vm_passthrough_devices', [])
     ssh_public_key = inputs.get('ssh_public_key', '')
     hashed_vm_passwd = inputs.get('hashed_vm_passwd', '')
     vm_user_name = inputs.get('vm_user_name', 'edgeuser')
-    
+
     if hashed_vm_passwd:
         ctx.logger.info('Received hashed password from base VM configuration')
     else:
-        ctx.logger.warning('No hashed password received from base VM - SSH password authentication may fail')
+        ctx.logger.warning(
+            'No hashed password received from base VM - '
+            'SSH password authentication may fail')
 
     my_index = get_instance_index()
+    vm_number = my_index + 2
+    prefix = f'vm_{vm_number}_'
+    dep_id_key = f'deployment_id_{vm_number:02d}'
 
-    if my_index >= len(additional_vm):
+    ctx.logger.info(
+        f"Instance index {my_index}: configuring VM #{vm_number} "
+        f"(input prefix: '{prefix}')"
+    )
+
+    # Resolve ece_service_tag from deployment_id
+    deployment_id = inputs.get(dep_id_key)
+    if not deployment_id:
         raise NonRecoverableError(
-            f"Instance index {my_index} exceeds additional_vm list of {len(additional_vm)}."
+            f"No deployment_id found for key '{dep_id_key}'. "
+            f"Ensure deployment_id_{vm_number:02d} is provided."
         )
 
-    vm_config = additional_vm[my_index]
-    ece_service_tag = vm_config['ece_service_tag']
+    client = get_rest_client()
+    ece_service_tag = get_service_tag_from_deployment(client, deployment_id)
+
+    # Read per-VM inputs
+    vm_name = inputs.get(f'{prefix}name', f'edge-cloud-init-{vm_number:02d}')
+    vm_hostname = inputs.get(f'{prefix}hostname', f'edgehost-{vm_number:02d}')
+    vcpus = inputs.get(f'{prefix}vcpus', 2)
+    memory_size = inputs.get(f'{prefix}memory_size', '4GB')
+    os_disk_size = inputs.get(f'{prefix}os_disk_size', '50GB')
+    disk = inputs.get(f'{prefix}disk_wrapper', '/DataStore0')
+    disk_controller = inputs.get(f'{prefix}disk_controller', 'VIRTIO')
+
     ctx.logger.info(
-        f"Instance index {my_index}: configuring VM "
-        f"'{vm_config.get('vm_name')}' on endpoint '{ece_service_tag}'"
+        f"VM #{vm_number}: '{vm_name}' on endpoint '{ece_service_tag}'"
     )
 
-    # Extract per-instance config
-    vm_name = vm_config['vm_name']
+    # Build vm_config dict for network functions
+    vm_config = {
+        'segment_name': inputs.get(f'{prefix}vnic_0_segment_name', ''),
+        'use_dhcp': inputs.get(f'{prefix}use_dhcp', True),
+        'static_ip': inputs.get(f'{prefix}static_ip', ''),
+        'use_gateway': inputs.get(f'{prefix}use_gateway', False),
+        'gateway': inputs.get(f'{prefix}gateway', ''),
+        'use_dns': inputs.get(f'{prefix}use_dns', False),
+        'dns': inputs.get(f'{prefix}dns', []),
+        'use_nat': inputs.get(f'{prefix}use_nat', False),
+        'port_forward_rules': inputs.get(f'{prefix}port_forward_rules', []),
+    }
 
-    # Filter additional NICs and disks by vm_name
-    my_add_nics = [
-        n for n in add_vm_add_nics
-        if n.get('vm_name') == vm_name
-    ]
-    my_add_disks = [
-        d for d in add_vm_add_disks
-        if d.get('vm_name') == vm_name
-    ]
-    my_passthrough = [
-        p for p in add_vm_passthrough_devices
-        if p.get('vm_name') == vm_name
-    ]
-    passthrough = build_passthrough_devices(my_passthrough)
+    # Read per-VM lists directly (no vm_name filtering needed)
+    my_add_nics = inputs.get(f'{prefix}vm_add_nics', [])
+    my_add_disks = inputs.get(f'{prefix}additional_disks', [])
+
+    # Read passthrough devices directly (already separated by type)
+    usb = inputs.get(f'{prefix}usb_wrapper', [])
+    gpu = inputs.get(f'{prefix}gpu_wrapper', [])
+    pcie = inputs.get(f'{prefix}pcie_wrapper', [])
+    video = inputs.get(f'{prefix}video', [])
+    serial_port = inputs.get(f'{prefix}serial_port_wrapper', [])
+
     ctx.logger.info(
-        f"Correlated {len(my_add_nics)} additional NIC(s), "
-        f"{len(my_add_disks)} additional disk(s), and "
-        f"{sum(len(v) for v in passthrough.values())} passthrough device(s) "
-        f"for VM '{vm_name}'"
+        f"VM #{vm_number}: {len(my_add_nics)} additional NIC(s), "
+        f"{len(my_add_disks)} additional disk(s), "
+        f"{len(usb) + len(gpu) + len(pcie) + len(video) + len(serial_port)} "
+        f"passthrough device(s)"
     )
-
-    vm_hostname = vm_config.get('vm_hostname', 'edgehost')
-    vcpus = vm_config.get('vcpus', 2)
-    memory_size = vm_config.get('memory_size', '4GB')
-    os_disk_size = vm_config.get('os_disk_size', '50GB')
-    disk = vm_config.get('disk', '/DataStore0')
 
     # Set runtime properties for ServiceComponent inputs
     ctx.instance.runtime_properties['ece_service_tag'] = ece_service_tag
@@ -313,6 +344,7 @@ if __name__ == "__main__":
     ctx.instance.runtime_properties['memory_size'] = memory_size
     ctx.instance.runtime_properties['os_disk_size'] = os_disk_size
     ctx.instance.runtime_properties['disk'] = disk
+    ctx.instance.runtime_properties['disk_controller'] = disk_controller
 
     # Build network settings
     ctx.instance.runtime_properties['network_settings'] = \
@@ -333,14 +365,14 @@ if __name__ == "__main__":
         build_additional_disks(my_add_disks)
 
     # Set passthrough device lists
-    ctx.instance.runtime_properties['usb'] = passthrough['usb']
-    ctx.instance.runtime_properties['serial_port'] = passthrough['serial_port']
-    ctx.instance.runtime_properties['gpu'] = passthrough['gpu']
-    ctx.instance.runtime_properties['video'] = passthrough['video']
-    ctx.instance.runtime_properties['pcie'] = passthrough['pcie']
+    ctx.instance.runtime_properties['usb'] = usb
+    ctx.instance.runtime_properties['serial_port'] = serial_port
+    ctx.instance.runtime_properties['gpu'] = gpu
+    ctx.instance.runtime_properties['video'] = video
+    ctx.instance.runtime_properties['pcie'] = pcie
 
     ctx.instance.update()
     ctx.logger.info(
         f"Instance {my_index}: runtime properties set for "
-        f"VM '{vm_name}' on endpoint '{ece_service_tag}'"
+        f"VM #{vm_number} '{vm_name}' on endpoint '{ece_service_tag}'"
     )
