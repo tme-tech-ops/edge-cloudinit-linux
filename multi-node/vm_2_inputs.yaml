@@ -225,7 +225,7 @@ inputs:
     display_label: 'VM #2 Name'
     description: |
       Name of the Virtual Machine
-    default: edge-cloud-init-02
+    default: edge-cloudinit-02
     display:
       group: multi_node
       index: 201

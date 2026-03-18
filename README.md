@@ -87,7 +87,7 @@ This secret holds the login password for the VM user account. Type the password 
 
 | Display Name | Input Name | Type | Default | Updatable | Description |
 |---|---|---|---|---|---|
-| VM Name | `vm_name` | String | `edge-cloud-init-01` | Yes | Name of the Virtual Machine |
+| VM Name | `vm_name` | String | `edge-cloudinit-01` | Yes | Name of the Virtual Machine |
 | VM Hostname | `vm_hostname` | String | `edgehost` | Yes | Hostname (letters, numbers, hyphens only; max 63 chars) |
 | VM Username | `vm_user_name` | String | `edgeuser` | No | Login username for the VM |
 | OS Type | `os_type` | String | `UBUNTU22.04` | No | Operating system type |
@@ -216,7 +216,7 @@ Deploy additional VMs alongside the base VM. Each additional VM can be deployed 
 | Display Name | Field Name | Required | Default | Description |
 |---|---|---|---|---|
 | Endpoint Service Tag | `ece_service_tag` | Yes | — | Service tag of the NativeEdge Endpoint where this VM will be deployed |
-| VM Name | `vm_name` | Yes | `edge-cloud-init-02` | Name of the Virtual Machine |
+| VM Name | `vm_name` | Yes | `edge-cloudinit-02` | Name of the Virtual Machine |
 | VM Hostname | `vm_hostname` | Yes | `edgehost2` | Hostname (letters, numbers, hyphens only; max 63 chars) |
 | vCPUs | `vcpus` | Yes | `2` | Number of virtual CPUs (minimum 2) |
 | Memory Size | `memory_size` | Yes | `4GB` | RAM allocation — value + unit (e.g. `8GB`) |
@@ -378,7 +378,7 @@ When deploying VMs across multiple endpoints:
 Deploy a single VM with basic configuration:
 
 ```yaml
-vm_name: "edge-cloud-init-01"
+vm_name: "edge-cloudinit-01"
 vm_hostname: "edgehost"
 vcpus: 2
 memory_size: "4GB"
@@ -394,7 +394,7 @@ Deploy base VM plus 2 additional VMs on the same endpoint:
 ```yaml
 additional_vm:
   - ece_service_tag: "endpoint-001"
-    vm_name: "edge-cloud-init-02"
+    vm_name: "edge-cloudinit-02"
     vm_hostname: "edgehost2"
     vcpus: 2
     memory_size: "4GB"
@@ -402,7 +402,7 @@ additional_vm:
     segment_name: "management-segment"
     use_dhcp: true
   - ece_service_tag: "endpoint-001"
-    vm_name: "edge-cloud-init-03"
+    vm_name: "edge-cloudinit-03"
     vm_hostname: "edgehost3"
     vcpus: 4
     memory_size: "8GB"

@@ -223,7 +223,7 @@ inputs:
     display_label: 'VM #4 Name'
     description: |
       Name of the Virtual Machine
-    default: edge-cloud-init-04
+    default: edge-cloudinit-04
     display:
       group: multi_node
       index: 401

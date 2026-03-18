@@ -293,7 +293,7 @@ if __name__ == "__main__":
     ece_service_tag = get_service_tag_from_deployment(client, deployment_id)
 
     # Read per-VM inputs
-    vm_name = inputs.get(f'{prefix}name', f'edge-cloud-init-{vm_number:02d}')
+    vm_name = inputs.get(f'{prefix}name', f'edge-cloudinit-{vm_number:02d}')
     vm_hostname = inputs.get(f'{prefix}hostname', f'edgehost-{vm_number:02d}')
     vcpus = inputs.get(f'{prefix}vcpus', 2)
     memory_size = inputs.get(f'{prefix}memory_size', '4GB')

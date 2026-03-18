@@ -8,11 +8,11 @@ def build_vm_entry(caps):
         'service_tag': caps.get('service_tag', ''),
         'hostname': caps.get('vm_hostname', ''),
         'primary_ip': caps.get('vm_primary_ip', ''),
-        'tap_ip': caps.get('tap_ip', ''),
-        'vm_add_nics': caps.get('vm_add_nics', 'N/A'),
-        'vm_add_disks': caps.get('vm_add_disks', []),
-        'vm_add_passthrough': caps.get('vm_add_passthrough', {}),
-        'proxy_target_id': caps.get('proxy_target_id', ''),
+        # 'tap_ip': caps.get('tap_ip', ''),
+        # 'vm_add_nics': caps.get('vm_add_nics', 'N/A'),
+        # 'vm_add_disks': caps.get('vm_add_disks', []),
+        # 'vm_add_passthrough': caps.get('vm_add_passthrough', {}),
+        # 'proxy_target_id': caps.get('proxy_target_id', ''),
     }
 
 
@@ -27,10 +27,10 @@ if __name__ == "__main__":
     base_vm = {}
     for inst in base_instances:
         caps = inst.runtime_properties.get('capabilities', {})
-        vm_name_id = caps.get('vm_name_id', '')
-        if vm_name_id:
-            base_vm = build_vm_entry(caps)
-            base_vm['vm_name_id'] = vm_name_id
+        vm_name = caps.get('vm_name', '')
+        if vm_name:
+            base_vm[vm_name] = build_vm_entry(caps)
+            # base_vm['vm_name'] = vm_name
             break
 
     ctx.instance.runtime_properties['base_vm'] = base_vm
@@ -45,14 +45,14 @@ if __name__ == "__main__":
     additional_vm = {}
     for inst in sorted_instances:
         caps = inst.runtime_properties.get('capabilities', {})
-        vm_name_id = caps.get('vm_name_id', '')
-        if vm_name_id:
-            additional_vm[vm_name_id] = build_vm_entry(caps)
+        vm_name = caps.get('vm_name', '')
+        if vm_name:
+            additional_vm[vm_name] = build_vm_entry(caps)
 
     ctx.instance.runtime_properties['additional_vm'] = additional_vm
     ctx.instance.update()
 
     ctx.logger.info(
-        f"Collected base VM: {base_vm.get('vm_name_id', 'N/A')}, "
+        f"Collected base VM: {base_vm.get('vm_name', 'N/A')}, "
         f"additional VMs: {list(additional_vm.keys())}"
     )

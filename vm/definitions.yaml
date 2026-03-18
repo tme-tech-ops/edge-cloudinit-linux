@@ -84,6 +84,7 @@ node_templates:
           external_resource: true
           id: { get_input: utility_blueprint_id }
         deployment:
+          display_name: { concat: ["utility-vm-", get_input: vm_name] }
           inputs:
             service_tag: { get_environment_capability: ece_service_tag }
             name: { get_input: vm_name }

@@ -218,7 +218,7 @@ inputs:
     display_label: 'VM #9 Name'
     description: |
       Name of the Virtual Machine
-    default: edge-cloud-init-09
+    default: edge-cloudinit-09
     display:
       group: multi_node
       index: 901

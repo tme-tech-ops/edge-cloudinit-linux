@@ -81,7 +81,7 @@ inputs:
     display_label: VM Name
     description: |
       Name of the Virtual Machine
-    default: edge-cloud-init-01
+    default: edge-cloudinit-01
     display:
       group: basic_vm
       index: 15
@@ -101,7 +101,7 @@ inputs:
         Must be letters (a-z, A-Z), numbers (0-9), or hyphens (-).
         No more than 64 characters.
     - max_length: 64
-    default: edgehost
+    default: edgehost-01
     display:
       group: basic_vm
       index: 20
