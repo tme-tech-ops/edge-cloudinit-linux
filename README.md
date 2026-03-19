@@ -4,17 +4,27 @@ A blueprint for the **Dell Automation Platform** that deploys a cloud-init Linux
 
 This blueprint may be used standalone or as a target environment for the **tme-tech-ops blueprint suite**.
 
+## Getting Started
+
+1. Download the **edge-cloudinit-utility-vm** blueprint from the [edge-cloudinit-utility-vm repository](https://tme-tech-ops/edge-cloudinit-utility-vm) using **Code > Download ZIP**.
+2. Upload it from the **Blueprints** page in the Dell Automation Platform. It is recommended to name this blueprint `edge-cloudinit-utility-vm`.
+3. Download this blueprint using **Code > Download ZIP**.
+4. Upload it from the **Blueprints** page.
+
+During deployment, inputs can be provided through the UI form or by uploading a JSON/YAML input file through the UI.
+
 ## Table of Contents
 
-[Supported Features](#supported-features)  
-[Prerequisites](#prerequisites)  
-[Secrets](#secrets)  
-[Inputs](#inputs)  
-[Outputs / Capabilities](#outputs--capabilities)  
-[Network Interface Layout](#network-interface-layout)  
-[Multi-VM Deployment](#multi-vm-deployment)  
-[Usage Examples](#usage-examples)  
-[Notes](#notes)  
+[Supported Features](#supported-features)
+[Getting Started](#getting-started)
+[Prerequisites](#prerequisites)
+[Secrets](#secrets)
+[Inputs](#inputs)
+[Outputs / Capabilities](#outputs--capabilities)
+[Network Interface Layout](#network-interface-layout)
+[Multi-VM Deployment](#multi-vm-deployment)
+[Usage Examples](#usage-examples)
+[Notes](#notes)
 
 ---
 
@@ -23,8 +33,8 @@ This blueprint may be used standalone or as a target environment for the **tme-t
 | Feature | Details |
 |---|---|
 | **OS Support** | Ubuntu 18.04 / 20.04 / 22.04 / 22.10 / 24.04, Debian (32/64-bit), RHEL 9, SUSE SLES 15, Linux Other |
-| **Multiple VM Definitions** | Support for multiple VM deployments from a single blueprint |
-| **Multiple Disks** | Primary OS disk + up to N additional virtual disks, configurable size and datastore |
+| **Multiple VM Definitions** | Deploy up to 10 VMs from a single blueprint (1 base + up to 9 additional) |
+| **Multiple Disks** | Primary OS disk + additional virtual disks, configurable size and datastore |
 | **Multiple NICs** | Primary NIC + up to 9 additional NICs; each independently configured |
 | **NIC Types** | NAT (with port forwarding) or Bridge per interface |
 | **Static / DHCP** | Configurable per NIC — DHCP or static IP, gateway, DNS |
@@ -32,13 +42,15 @@ This blueprint may be used standalone or as a target environment for the **tme-t
 | **Device Passthrough** | USB, PCIe, GPU, Video, and Serial port passthrough |
 | **SSH Key Automation** | SSH keypair generated automatically at deploy time |
 
+> **Note:** This blueprint creates a cloud-init configuration tuned for networkd and netplan, which is default for Ubuntu. Adjust other OS platforms accordingly.
+
 ---
 
 ## Prerequisites
 
 - A **NativeEdge Endpoint** onboarded in the Dell Automation Platform
 - A **Virtual Network Segment** (NAT or Bridge) configured on the Endpoint for the primary NIC
-- The **edge-cloudinit-utility-vm** blueprint uploaded to the platform
+- The **edge-cloudinit-utility-vm** blueprint uploaded to the platform (see [Getting Started](#getting-started))
 - Two secrets created before deployment (see [Secrets](#secrets))
 
 ---
@@ -66,7 +78,7 @@ This secret provides the blueprint with access to the OS image repository. It mu
 
 Type: **Password**
 
-This secret holds the login password for the VM user account. Type the password in plain text, it will automatically be encrypted (SHA-256) at runtime.
+This secret holds the login password for the VM user account. Type the password in plain text; it will automatically be encrypted (SHA-512) at runtime.
 
 ---
 
@@ -74,86 +86,73 @@ This secret holds the login password for the VM user account. Type the password 
 
 ### Required Inputs
 
-| Display Name | Input Name | Type | Description |
-|---|---|---|---|
-| OS Image Secret for Virtual Machine creation | `edge_os_image_secret` | Secret | OS image secret (see [Secrets](#secrets)) |
-| VM Password | `vm_password` | Secret | VM user password secret (see [Secrets](#secrets)) |
-| Endpoint Datastore Path | `disk_wrapper` | String | Datastore path on the target Endpoint (selected from endpoint inventory) |
-| Virtual Network Segment name for Management Interface | `vnic_0_segment_name` | String | Virtual Network Segment name for the primary NIC (selected from endpoint inventory) |
+| Display Name | Input Name | Type | Default | Description |
+|---|---|---|---|---|
+| Number of Virtual Machines | `number_of_vms` | Integer | `1` | Number of VMs to create (1-10) |
+| OS Image Secret | `edge_os_image_secret` | Secret | — | OS image secret (see [Secrets](#secrets)) |
+| VM Password | `vm_password` | Secret | — | VM user password secret (see [Secrets](#secrets)) |
+| Endpoint Datastore Path | `disk_wrapper` | String | — | Datastore path on the target Endpoint (selected from endpoint inventory) |
+| Virtual Network Segment | `vnic_0_segment_name` | String | — | Virtual Network Segment name for the primary NIC (selected from endpoint inventory) |
+| OS Disk Size | `os_disk_size` | String | `50GB` | OS disk size — value + unit (e.g. `100GB`) |
 
 ---
 
-### Virtual Machine
+### Basic VM Configuration (Optional)
 
 | Display Name | Input Name | Type | Default | Updatable | Description |
 |---|---|---|---|---|---|
-| VM Name | `vm_name` | String | `edge-cloudinit-01` | Yes | Name of the Virtual Machine |
-| VM Hostname | `vm_hostname` | String | `edgehost` | Yes | Hostname (letters, numbers, hyphens only; max 63 chars) |
-| VM Username | `vm_user_name` | String | `edgeuser` | No | Login username for the VM |
 | OS Type | `os_type` | String | `UBUNTU22.04` | No | Operating system type |
-| vCPUs | `vcpus` | Integer | `2` | Yes | Number of virtual CPUs (minimum 2) |
-| Memory Size | `memory_size` | String | `4GB` | Yes | RAM allocation — value + unit (e.g. `8GB`) |
-| OS Disk Size | `os_disk_size` | String | `50GB` | Yes | OS disk size — value + unit (e.g. `100GB`) |
-| Disk Controller | `disk_controller` | String | `VIRTIO` | Yes | Disk controller type: `VIRTIO`, `SATA`, or `SCSI` |
-| Endpoint Datastore Path | `disk_wrapper` | String | *(required)* | No | DataStore path for OS disk (selected from endpoint inventory) |
+| Utility Blueprint Name | `utility_blueprint_id` | String | `edge-cloudinit-utility-vm` | No | Name of the uploaded edge-cloudinit utility blueprint |
+| VM Name | `vm_name` | String | `edge-cloudinit-01` | Yes | Name of the Virtual Machine |
+| VM Hostname | `vm_hostname` | String | `edgehost-01` | Yes | Hostname (letters, numbers, hyphens only; max 63 chars) |
+| VM Username | `vm_user_name` | String | `edgeuser` | No | Login username for the VM |
+| Use DHCP | `use_dhcp` | Boolean | `true` | Yes | Use DHCP on the primary NIC. If false, configure static IP below |
+| Static IP/CIDR | `static_ip` | String | — | Yes | Static IP in CIDR notation (e.g. `192.168.1.100/24`). Required when DHCP is disabled |
+| Use Gateway | `use_gateway` | Boolean | `false` | Yes | Configure a default gateway |
+| Gateway IP | `gateway` | String | — | Yes | Gateway IP address (e.g. `192.168.1.1`) |
+| Use DNS | `use_dns` | Boolean | `false` | Yes | Configure DNS servers |
+| DNS Servers | `dns` | List | `[]` | Yes | List of DNS server IP addresses |
 
 **Supported OS Types:** `UBUNTU18.04`, `UBUNTU20.04`, `UBUNTU22.04`, `UBUNTU22.10`, `UBUNTU24.04`, `DEBIAN-32B`, `DEBIAN-64B`, `RHEL9`, `SUSE-SLES15`, `LINUX-OTHER`
+> **Note:** This blueprint creates a cloud-init configuration tuned for networkd and netplan, which is default for Ubuntu. Adjust other OS platforms accordingly.
 
 ---
 
-### Additional Disks (Optional)
+### Advanced VM Configuration (Optional)
+
+#### Hardware and Resources
+
+| Display Name | Input Name | Type | Default | Updatable | Description |
+|---|---|---|---|---|---|
+| Firmware Type | `hardware_options.firmware_type` | String | `BIOS` | No | Firmware type: `BIOS` or `UEFI` |
+| Secure Boot | `hardware_options.secure_boot` | Boolean | `false` | No | Enable Secure Boot (requires UEFI) |
+| Add vTPM | `hardware_options.vTPM` | Boolean | `false` | No | Add a virtual TPM (typically required for Secure Boot) |
+| vCPUs | `vcpus` | Integer | `2` | Yes | Number of virtual CPUs (minimum 2) |
+| Memory Size | `memory_size` | String | `4GB` | Yes | RAM allocation — value + unit (e.g. `8GB`) |
+| Disk Controller | `disk_controller` | String | `VIRTIO` | Yes | Disk controller type: `VIRTIO`, `SATA`, or `SCSI` |
+
+#### Additional Disks
+
+Enable with `add_disks: true` to reveal the disk list.
 
 | Display Name | Input Name | Type | Default | Description |
 |---|---|---|---|---|
-| Optional list of additional Virtual Disks | `additional_disks` | List | `[]` | List of additional virtual disks to attach to the VM |
+| Add Additional Disks | `add_disks` | Boolean | `false` | Enable additional virtual disks |
+| Additional Disks | `additional_disks` | List | `[]` | List of additional virtual disks to attach |
 
 Each disk entry requires:
 
-| Display Name | Field Name | Default | Description |
+| Field | Type | Default | Description |
 |---|---|---|---|
-| Name | `name` | `vdisk2` | Unique name to identify the disk |
-| Disk Path | `disk` | `/DataStore0` | DataStore path where the disk will be created |
-| Storage Size | `storage` | `16` | Disk size (integer) |
-| Storage Unit | `storage_unit` | `GB` | Size unit: `KB`, `MB`, `GB`, `TB`, etc. |
+| `name` | String | `vdisk2` | Unique name to identify the disk |
+| `disk` | String | `/DataStore0` | DataStore path where the disk will be created |
+| `storage` | Integer | `16` | Disk size (integer) |
+| `storage_unit` | String | `GB` | Size unit: `KB`, `MB`, `GB`, `TB`, etc. |
 
----
-
-### Advanced Boot Options (Optional)
+#### NAT Port Forwarding
 
 | Display Name | Input Name | Type | Default | Description |
 |---|---|---|---|---|
-| Firmware Type | `hardware_options.firmware_type` | String | `BIOS` | Firmware type: `BIOS` or `UEFI` |
-| Secure Boot | `hardware_options.secure_boot` | Boolean | `false` | Enable Secure Boot (requires UEFI) |
-| Add vTPM | `hardware_options.vTPM` | Boolean | `false` | Add a virtual TPM (typically required for Secure Boot) |
-
----
-
-### Device Passthrough (Optional)
-
-Enable with `use_passthrough: true`. All passthrough inputs are populated from the endpoint inventory.
-
-| Display Name | Input Name | Type | Description |
-|---|---|---|---|
-| Enable device passthrough | `use_passthrough` | Boolean | Enable device passthrough |
-| USB Device list | `usb` | List | USB device logical names to pass through |
-| PCIe Passthrough | `pcie` | List | PCIe device logical names to pass through |
-| GPU Passthrough | `gpu` | List | GPU logical names to pass through |
-| Video Passthrough | `video` | List | Video controller to pass through (e.g. `onboard controller`) |
-| Serial Port | `serial_port_wrapper` | List | Serial port + mode pairs to pass through |
-
----
-
-### Primary Network Interface
-
-| Display Name | Input Name | Type | Default | Description |
-|---|---|---|---|---|
-| Virtual Network Segment name for Management Interface | `vnic_0_segment_name` | String | *(required)* | Virtual Network Segment for the primary NIC |
-| Use DHCP | `use_dhcp` | Boolean | `true` | Use DHCP on the primary NIC |
-| Static IP and CIDR prefix | `static_ip` | String | — | Static IP/CIDR (e.g. `192.168.1.100/24`). Required when DHCP is disabled |
-| Use Gateway | `use_gateway` | Boolean | `false` | Configure a default gateway |
-| Gateway IP | `gateway` | String | — | Gateway IP address (e.g. `192.168.1.1`) |
-| Use DNS | `use_dns` | Boolean | `false` | Configure DNS servers |
-| DNS Servers | `dns` | List | `[]` | List of DNS server IP addresses |
 | Enable NAT Port Forwarding | `use_nat` | Boolean | `false` | Enable NAT port forwarding on the primary NIC |
 | Port Mapping | `port_forward_rules` | List | `[]` | Port forwarding rules (see below) |
 
@@ -168,103 +167,46 @@ Enable with `use_passthrough: true`. All passthrough inputs are populated from t
 | `service_type` | `SSH`, `HTTP`, or `CUSTOM` |
 | `vm_ip` | VM IP — only required when using static IP on the primary NIC |
 
----
+#### Additional Network Interfaces
 
-### Additional Network Interfaces (Optional)
+Enable with `add_nics: true` to reveal the NIC list.
 
 | Display Name | Input Name | Type | Default | Description |
 |---|---|---|---|---|
-| Additional Network Interfaces | `additional_nics` | List | `[]` | Up to 9 additional NICs beyond the primary |
+| Add Additional NICs | `add_nics` | Boolean | `false` | Enable additional network interfaces |
+| Additional NICs | `vm_add_nics` | List | `[]` | Up to 9 additional NICs beyond the primary |
 
 Each additional NIC entry:
 
-| Display Name | Field Name | Required | Default | Description |
-|---|---|---|---|---|
-| NIC Label | `nic_name` | Yes | — | Unique label for this NIC entry (e.g. `Data NIC 1`) |
-| Segment Name | `segment_name` | Yes | — | Virtual Network Segment name to attach to (NAT or Bridge) |
-| Use DHCP | `use_dhcp` | Yes | `true` | Use DHCP. If false, `static_ip` is required |
-| Accept DHCP Routes | `accept_dhcp_routes` | No | `false` | Accept gateway/routes from DHCP. Disable to prevent routing conflicts |
-| Static IP/CIDR | `static_ip` | No | — | Static IP/CIDR (e.g. `10.10.0.50/24`). Required when DHCP is disabled |
-| Use Gateway | `use_gateway` | No | `false` | Configure a static route for this NIC |
-| Gateway IP | `gateway` | No | — | Gateway IP for the static route |
-| Route Destination (CIDR) | `route_destination` | No | — | Destination subnet in CIDR (e.g. `10.20.0.0/16`). Do not use `0.0.0.0/0` |
-| Use DNS | `use_dns` | No | `false` | Configure DNS servers for this NIC |
-| DNS Servers | `dns` | No | — | Comma-separated DNS IPs (e.g. `8.8.8.8,8.8.4.4`) |
-| Enable NAT | `use_nat` | No | `false` | Enable NAT port forwarding on this NIC |
-| Port Forward Rules (JSON) | `port_forward_rules` | No | — | JSON string of port forwarding rules |
+| Field | Required | Default | Description |
+|---|---|---|---|
+| `nic_name` | Yes | — | Unique label for this NIC entry (e.g. `nic2`) |
+| `segment_name` | Yes | — | Virtual Network Segment name to attach to (NAT or Bridge) |
+| `use_dhcp` | Yes | `true` | Use DHCP. If false, `static_ip` is required |
+| `accept_dhcp_routes` | No | `false` | Accept gateway/routes from DHCP. Disable to prevent routing conflicts |
+| `static_ip` | No | — | Static IP/CIDR (e.g. `10.10.0.50/24`). Required when DHCP is disabled |
+| `use_gateway` | No | `false` | Configure a static route for this NIC |
+| `gateway` | No | — | Gateway IP for the static route |
+| `route_destination` | No | — | Destination subnet in CIDR (e.g. `10.20.0.0/16`). Do not use `0.0.0.0/0` |
+| `use_dns` | No | `false` | Configure DNS servers for this NIC |
+| `dns` | No | — | Comma-separated DNS IPs (e.g. `8.8.8.8,8.8.4.4`) |
+| `use_nat` | No | `false` | Enable NAT port forwarding on this NIC |
+| `port_forward_rules` | No | — | JSON string of port forwarding rules |
 
 > **Note:** Multiple NICs may share the same segment name. Only the primary NIC should have a default route (`0.0.0.0/0`).
 
----
+#### Device Passthrough
 
-### Multi-VM Deployment (Optional)
+Enable with `use_passthrough: true`. All passthrough inputs are populated from the endpoint inventory.
 
-Deploy additional VMs alongside the base VM. Each additional VM can be deployed on different NativeEdge Endpoints with independent configurations.
-
-| Display Name | Input Name | Type | Default | Description |
-|---|---|---|---|---|
-| Additional VM Configurations | `additional_vm` | List | `[]` | List of additional VM configurations. Each entry defines a VM with per-VM settings. |
-| Add NICs to Additional VMs | `add_vm_nics` | Boolean | `false` | Enable additional network interfaces for additional VMs |
-| Additional VM NICs | `add_vm_add_nics` | List | `[]` | Network interface configurations for additional VMs |
-| Add Disks to Additional VMs | `add_vm_disks` | Boolean | `false` | Enable additional virtual disks for additional VMs |
-| Additional VM Disks | `add_vm_add_disks` | List | `[]` | Virtual disk configurations for additional VMs |
-| Add Passthrough Devices to Additional VMs | `add_vm_passthrough` | Boolean | `false` | Enable device passthrough for additional VMs |
-| Additional VM Passthrough Devices | `add_vm_passthrough_devices` | List | `[]` | Device passthrough configurations for additional VMs |
-
-**Additional VM Configuration Fields:**
-
-| Display Name | Field Name | Required | Default | Description |
-|---|---|---|---|---|
-| Endpoint Service Tag | `ece_service_tag` | Yes | — | Service tag of the NativeEdge Endpoint where this VM will be deployed |
-| VM Name | `vm_name` | Yes | `edge-cloudinit-02` | Name of the Virtual Machine |
-| VM Hostname | `vm_hostname` | Yes | `edgehost2` | Hostname (letters, numbers, hyphens only; max 63 chars) |
-| vCPUs | `vcpus` | Yes | `2` | Number of virtual CPUs (minimum 2) |
-| Memory Size | `memory_size` | Yes | `4GB` | RAM allocation — value + unit (e.g. `8GB`) |
-| OS Disk Size | `os_disk_size` | Yes | `50GB` | OS disk size — value + unit (e.g. `100GB`) |
-| Datastore Path | `disk` | Yes | `/DataStore0` | Datastore path on the target Endpoint |
-| Primary Network Segment | `segment_name` | Yes | — | Virtual Network Segment name for the primary NIC |
-| Use DHCP | `use_dhcp` | Yes | `true` | Use DHCP for the primary NIC. If false, static_ip is required |
-| Static IP/CIDR | `static_ip` | No | — | Static IP/CIDR (e.g. `192.168.0.100/24`). Required when DHCP is disabled |
-| Use Gateway | `use_gateway` | No | `false` | Configure a default gateway for the primary NIC |
-| Gateway | `gateway` | No | — | Gateway IP address (e.g. `192.168.0.1`) |
-| Use DNS | `use_dns` | No | `false` | Configure DNS servers for the primary NIC |
-| DNS Servers | `dns` | No | — | Comma-separated DNS server IPs (e.g. `8.8.8.8,8.8.4.4`) |
-
-**Additional VM NIC Configuration Fields:**
-
-| Display Name | Field Name | Required | Default | Description |
-|---|---|---|---|---|
-| VM Name | `vm_name` | Yes | — | VM Name to correlate this NIC with an additional VM entry |
-| NIC Label | `nic_name` | Yes | `nic2` | Unique label for this NIC entry (e.g. "NIC 2") |
-| Segment Name | `segment_name` | Yes | — | Name of the Virtual Network Segment to attach this NIC to |
-| Use DHCP | `use_dhcp` | Yes | `true` | Use DHCP for this NIC. If false, static_ip is required |
-| Accept DHCP Routes | `accept_dhcp_routes` | No | `false` | Accept gateway/routes from DHCP server (default: false) |
-| Static IP/CIDR | `static_ip` | No | — | Static IP/CIDR (e.g. `192.168.0.100/24`). Required when DHCP is disabled |
-| Use Gateway | `use_gateway` | No | `false` | Configure a static route for this NIC |
-| Gateway IP | `gateway` | No | — | Gateway IP address for the static route |
-| Route Destination (CIDR) | `route_destination` | No | — | Destination subnet in CIDR (e.g. `10.20.0.0/16`). Do not use `0.0.0.0/0` |
-| Use DNS | `use_dns` | No | `false` | Configure DNS servers for this NIC |
-| DNS Servers | `dns` | No | — | Comma-separated DNS server IPs (e.g. `8.8.8.8,8.8.4.4`) |
-| Enable NAT | `use_nat` | No | `false` | Enable NAT port forwarding for this NIC |
-| Port Forward Rules (JSON) | `port_forward_rules` | No | — | JSON-formatted port forwarding rules as a string |
-
-**Additional VM Disk Configuration Fields:**
-
-| Display Name | Field Name | Required | Default | Description |
-|---|---|---|---|---|
-| VM Name | `vm_name` | Yes | — | VM Name to correlate this disk with an additional VM entry |
-| Name | `name` | Yes | `vdisk2` | Unique name to identify the virtual disk |
-| Disk Path | `disk` | Yes | `/DataStore0` | The /DataStore path where the virtual disk will be created |
-| Storage Size | `storage` | Yes | `16` | The size of the virtual disk, specified as an integer value |
-| Storage Unit | `storage_unit` | Yes | `GB` | The unit of measurement for the disk size |
-
-**Additional VM Passthrough Device Configuration Fields:**
-
-| Display Name | Field Name | Required | Description |
+| Display Name | Input Name | Type | Description |
 |---|---|---|---|
-| VM Name | `vm_name` | Yes | VM Name to correlate this passthrough device with an additional VM entry |
-| Device Type | `device_type` | Yes | Type of passthrough device: `usb`, `serial_port`, `gpu`, `video`, `pcie` |
-| Device | `device` | Yes | Device logical name or identifier. For serial ports, use PORT_MODE format (e.g. `COM-1_RS-232`) |
+| Enable Device Passthrough | `use_passthrough` | Boolean | Enable device passthrough |
+| USB Devices | `usb_wrapper` | List | USB device logical names to pass through |
+| GPU Devices | `gpu_wrapper` | List | GPU logical names to pass through |
+| PCIe Devices | `pcie_wrapper` | List | PCIe device logical names to pass through |
+| Video Devices | `video` | List | Video controller to pass through (e.g. `onboard controller`) |
+| Serial Ports | `serial_port_wrapper` | List | Serial port + mode pairs to pass through (e.g. `COM-1_RS-232`) |
 
 ---
 
@@ -276,33 +218,18 @@ After a successful deployment, the following values are available as environment
 
 | Output | Description |
 |---|---|
-| `service_tag` | NativeEdge Endpoint service tag |
-| `vm_name` | Name of the deployed Virtual Machine |
-| `vm_hostname` | Hostname configured inside the VM |
-| `vm_primary_ip` | IP address of the primary NIC (`enp1s0`) |
-| `additional_nics` | IPs of additional NICs as `["enp2s0:192.168.10.50", ...]`, or `N/A` if none |
-| `tap_interface` | IP address of the management (tap) interface |
+| `base_vm` | Base VM details (name, hostname, primary IP, service tag, network interfaces, SSH info) |
 | `vm_user_name` | Login username for the VM |
 | `vm_ssh_private_key` | Name of the secret holding the auto-generated SSH private key |
 | `vm_password_secret` | Reference to the VM password secret |
 
-### Additional VM Outputs
+### Multi-VM Outputs
 
-When deploying additional VMs, the following outputs are available:
+When deploying additional VMs (`number_of_vms` > 1):
 
 | Output | Description |
 |---|---|
-| `base_vm` | Base VM details and configuration |
-| `additional_vm` | Additional VM details keyed by VM name |
-
-The `additional_vm` capability contains a dictionary where each key is the VM name and the value includes:
-- VM name and hostname
-- Primary IP address
-- Endpoint service tag
-- Network interface details
-- SSH access information
-
-Access individual VM information using the VM name as the key in the `additional_vm` capability.
+| `additional_vm` | Dictionary of additional VMs keyed by VM name, each containing name, hostname, primary IP, service tag, network interfaces, and SSH info |
 
 ---
 
@@ -313,182 +240,190 @@ The VM interfaces are assigned in the following deterministic order:
 | Interface | Role |
 |---|---|
 | `enp1s0` | Primary NIC (`vnic_0_segment_name`) |
-| `enp2s0` … `enp{N+1}s0` | Additional NICs (in order of the `additional_nics` list) |
+| `enp2s0` ... `enp{N+1}s0` | Additional NICs (in order of the `vm_add_nics` list) |
 | `enp{N+2}s0` | Management / tap interface (infrastructure segment, always present) |
 
 ---
 
 ## Multi-VM Deployment
 
-The blueprint supports deploying multiple VMs from a single deployment, enabling complex edge computing scenarios with distributed workloads.
+The blueprint supports deploying up to 10 VMs from a single deployment using the `number_of_vms` input.
 
-### Overview
+### How It Works
 
-Deploy a base VM plus up to 9 additional VMs with the following capabilities:
+- Set `number_of_vms` to the total number of VMs (1-10). The first VM uses the base inputs documented above.
+- For each additional VM (2-10), a set of per-VM inputs becomes available in the UI, prefixed with `vm_N_` (e.g. `vm_2_name`, `vm_3_vcpus`).
+- Each additional VM also has a `deployment_id_0N` input (e.g. `deployment_id_02`) to select which NativeEdge Endpoint it will be deployed on.
+- Additional VM inputs only appear in the UI when `number_of_vms` is set to that VM's number or higher.
 
-- **Cross-Endpoint Deployment**: Each additional VM can be deployed on different NativeEdge Endpoints
-- **Independent Configuration**: Per-VM resource allocation, networking, and storage settings
-- **Scalable Architecture**: Use scaling policies to dynamically adjust the number of additional VMs
-- **Resource Correlation**: Associate NICs, disks, and devices with specific VMs using VM names
+### Per-VM Inputs (VMs 2-10)
 
-### Deployment Requirements
+Each additional VM supports the same configuration categories as the base VM. The input names follow the pattern `vm_N_<input_name>`:
 
-- **Utility Blueprint**: The `edge-cloudinit-utility-vm` blueprint must be uploaded to the platform
-- **Multiple Endpoints**: For cross-endpoint deployments, ensure all target endpoints are onboarded
-- **Resource Planning**: Verify sufficient resources (CPU, memory, storage) on target endpoints
-- **Network Segments**: Ensure required network segments exist on all target endpoints
+| Category | Inputs | Defaults |
+|---|---|---|
+| **Endpoint** | `deployment_id_0N` | — (required) |
+| **Identity** | `vm_N_name`, `vm_N_hostname` | `edge-cloudinit-0N`, `edgehost-0N` |
+| **Resources** | `vm_N_vcpus`, `vm_N_memory_size`, `vm_N_os_disk_size`, `vm_N_disk_controller` | `2`, `4GB`, `50GB`, `VIRTIO` |
+| **Storage** | `vm_N_disk_wrapper` | — (required) |
+| **Primary Network** | `vm_N_vnic_0_segment_name`, `vm_N_use_dhcp`, `vm_N_static_ip`, `vm_N_use_gateway`, `vm_N_gateway`, `vm_N_use_dns`, `vm_N_dns` | — (segment required), `true`, ... |
+| **NAT** | `vm_N_use_nat`, `vm_N_port_forward_rules` | `false`, `[]` |
+| **Additional NICs** | `vm_N_add_nics`, `vm_N_vm_add_nics` | `false`, `[]` |
+| **Additional Disks** | `vm_N_add_disks`, `vm_N_additional_disks` | `false`, `[]` |
+| **Device Passthrough** | `vm_N_use_passthrough`, `vm_N_usb_wrapper`, `vm_N_gpu_wrapper`, `vm_N_pcie_wrapper`, `vm_N_video`, `vm_N_serial_port_wrapper` | `false`, `[]` |
 
-### VM Correlation Mechanism
+> Replace `N` with the VM number (2-10) and `0N` with the zero-padded VM number (02-10).
 
-Resources are correlated with VMs using the following mechanisms:
+### Cross-Endpoint Deployment
 
-- **VM Name**: Primary correlation key for NICs, disks, and passthrough devices
-- **Endpoint Service Tag**: Identifies the target endpoint for each VM
-- **Scaling Policy**: Controls the number of VM instances deployed
+Each additional VM can target a different NativeEdge Endpoint via its `deployment_id_0N` input. Ensure that:
 
-### Scaling Configuration
-
-The blueprint uses a scaling policy with the following parameters:
-
-- **Default Instances**: Dynamically set by the length of the `additional_vm` input list
-- **Target Group**: `add_vm_group` (includes VM preparation and deployment components)
-
-### Deployment Order
-
-1. **Base VM**: Deployed first with primary configuration
-2. **Additional VMs**: Deployed in parallel after base VM completion
-3. **Resource Collection**: VM information gathered and made available as capabilities
-4. **Result Aggregation**: All VM results compiled into structured outputs
-
-### Cross-Endpoint Considerations
-
-When deploying VMs across multiple endpoints:
-
-- **Network Connectivity**: Ensure endpoints can communicate if required
-- **Resource Availability**: Verify each endpoint has sufficient resources
-- **Security Policies**: Apply appropriate security policies per endpoint
-- **Monitoring**: Configure monitoring for distributed VM deployments
+- All target endpoints are onboarded in the platform
+- Required network segments exist on each target endpoint
+- Sufficient resources (CPU, memory, storage) are available on each endpoint
 
 ---
 
 ## Usage Examples
 
-### Single VM Deployment
-
-Deploy a single VM with basic configuration:
+### Single VM with DHCP
 
 ```yaml
+number_of_vms: 1
+edge_os_image_secret: "my_image_secret_name"
 vm_name: "edge-cloudinit-01"
-vm_hostname: "edgehost"
+vm_hostname: "edgehost-01"
+vm_user_name: "edgeuser"
+vm_password: "my_password_secret_name"
+disk_wrapper: "/DataStore0"
+vnic_0_segment_name: "bridge0"
 vcpus: 2
 memory_size: "4GB"
 os_disk_size: "50GB"
-vnic_0_segment_name: "management-segment"
 use_dhcp: true
 ```
 
-### Multi-VM Deployment on Single Endpoint
-
-Deploy base VM plus 2 additional VMs on the same endpoint:
+### Single VM with Static IP
 
 ```yaml
-additional_vm:
-  - ece_service_tag: "endpoint-001"
-    vm_name: "edge-cloudinit-02"
-    vm_hostname: "edgehost2"
-    vcpus: 2
-    memory_size: "4GB"
-    os_disk_size: "50GB"
-    segment_name: "management-segment"
-    use_dhcp: true
-  - ece_service_tag: "endpoint-001"
-    vm_name: "edge-cloudinit-03"
-    vm_hostname: "edgehost3"
-    vcpus: 4
-    memory_size: "8GB"
-    os_disk_size: "100GB"
-    segment_name: "data-segment"
-    use_dhcp: false
-    static_ip: "10.10.0.50/24"
-    use_gateway: true
-    gateway: "10.10.0.1"
+number_of_vms: 1
+edge_os_image_secret: "my_image_secret_name"
+os_type: "UBUNTU22.04"
+utility_blueprint_id: "edge-cloudinit-utility-vm"
+vm_name: "edge-cloudinit-01"
+vm_hostname: "edgehost-01"
+vm_user_name: "edgeuser"
+vm_password: "my_password_secret_name"
+disk_wrapper: "/DataStore0"
+vnic_0_segment_name: "bridge0"
+vcpus: 4
+memory_size: "8GB"
+os_disk_size: "100GB"
+use_dhcp: false
+static_ip: "192.168.1.100/24"
+use_gateway: true
+gateway: "192.168.1.1"
+use_dns: true
+dns:
+  - "8.8.8.8"
+  - "8.8.4.4"
 ```
 
-### Cross-Endpoint Multi-VM Deployment
-
-Deploy VMs across different endpoints with network and disk configurations:
+### Two VMs on the Same Endpoint
 
 ```yaml
-additional_vm:
-  - ece_service_tag: "endpoint-001"
-    vm_name: "web-server-01"
-    vm_hostname: "webhost01"
-    vcpus: 2
-    memory_size: "4GB"
-    segment_name: "web-segment"
-    use_dhcp: true
-  - ece_service_tag: "endpoint-002"
-    vm_name: "database-01"
-    vm_hostname: "dbhost01"
-    vcpus: 4
-    memory_size: "16GB"
-    os_disk_size: "100GB"
-    segment_name: "db-segment"
-    use_dhcp: false
-    static_ip: "192.168.10.100/24"
+number_of_vms: 2
 
-add_vm_nics: true
-add_vm_add_nics:
-  - vm_name: "database-01"
-    nic_name: "backup-nic"
-    segment_name: "backup-segment"
-    use_dhcp: true
-  - vm_name: "web-server-01"
-    nic_name: "data-nic"
-    segment_name: "data-segment"
-    use_dhcp: false
-    static_ip: "10.20.0.200/24"
+# Base VM
+edge_os_image_secret: "my_image_secret_name"
+vm_name: "edge-cloudinit-01"
+vm_hostname: "edgehost-01"
+vm_user_name: "edgeuser"
+vm_password: "my_password_secret_name"
+disk_wrapper: "/DataStore0"
+vnic_0_segment_name: "bridge0"
+vcpus: 2
+memory_size: "4GB"
+os_disk_size: "50GB"
+use_dhcp: true
 
-add_vm_disks: true
-add_vm_add_disks:
-  - vm_name: "database-01"
-    name: "data-disk"
+# VM 2
+deployment_id_02: "ece-XXXXXXX"
+vm_2_name: "edge-cloudinit-02"
+vm_2_hostname: "edgehost-02"
+vm_2_vcpus: 4
+vm_2_memory_size: "8GB"
+vm_2_os_disk_size: "100GB"
+vm_2_disk_wrapper: "/DataStore1"
+vm_2_vnic_0_segment_name: "bridge1"
+vm_2_use_dhcp: false
+vm_2_static_ip: "10.10.0.50/24"
+vm_2_use_gateway: true
+vm_2_gateway: "10.10.0.1"
+```
+
+### Three VMs Across Multiple Endpoints
+
+```yaml
+number_of_vms: 3
+
+# Base VM (deployed on the primary endpoint selected during deployment)
+edge_os_image_secret: "my_image_secret_name"
+vm_name: "web-server"
+vm_hostname: "webserver-01"
+vm_user_name: "admin"
+vm_password: "my_password_secret_name"
+disk_wrapper: "/DataStore0"
+vnic_0_segment_name: "bridge0"
+vcpus: 2
+memory_size: "4GB"
+os_disk_size: "50GB"
+use_dhcp: true
+
+# VM 2 on a second endpoint
+deployment_id_02: "ece-XXXXXXX"
+vm_2_name: "app-server"
+vm_2_hostname: "apphost-01"
+vm_2_vcpus: 4
+vm_2_memory_size: "16GB"
+vm_2_os_disk_size: "100GB"
+vm_2_disk_wrapper: "/DataStore0"
+vm_2_vnic_0_segment_name: "bridge0"
+vm_2_use_dhcp: true
+
+# VM 3 on a third endpoint
+deployment_id_03: "ece-YYYYYYY"
+vm_3_name: "db-server"
+vm_3_hostname: "dbhost-01"
+vm_3_vcpus: 4
+vm_3_memory_size: "16GB"
+vm_3_os_disk_size: "200GB"
+vm_2_disk_wrapper: "/Shared_DataStore"
+vm_2_vnic_0_segment_name: "bridge0"
+vm_3_use_dhcp: false
+vm_3_static_ip: "192.168.10.100/24"
+vm_3_use_gateway: true
+vm_3_gateway: "192.168.10.1"
+vm_3_add_disks: true
+vm_3_additional_disks:
+  - name: "data-disk"
     disk: "/DataStore0"
     storage: 500
     storage_unit: "GB"
-  - vm_name: "web-server-01"
-    name: "log-disk"
-    disk: "/DataStore0"
-    storage: 100
-    storage_unit: "GB"
-```
-
-### Device Passthrough Configuration
-
-Configure device passthrough for additional VMs:
-
-```yaml
-add_vm_passthrough: true
-add_vm_passthrough_devices:
-  - vm_name: "gpu-workstation-01"
-    device_type: "gpu"
-    device: "nvidia-gpu-001"
-  - vm_name: "serial-device-01"
-    device_type: "serial_port"
-    device: "COM-1_RS-232"
-  - vm_name: "usb-device-01"
-    device_type: "usb"
-    device: "usb-device-001"
+vm_3_add_nics: true
+vm_3_vm_add_nics:
+  - nic_name: nic2
+  - segment_name: bridge1
+  - use_dhcp: false
+  - static_ip: "172.16.20.50/22"
 ```
 
 ---
 
 ## Notes
 
-- The SSH keypair is generated automatically at deploy time. The private key is stored as a platform secret and referenced by the `vm_ssh_private_key` output. If you preffer your own ssh-key pair, create `general` type secrets containing the values name `edge_key_public` and `edge_key_private` respectively.
-- The management tap interface is always provisioned regardless of `additional_nics` configuration, and always occupies the last `enp*s0` interface slot.
+- The SSH keypair is generated automatically at deploy time. The private key is stored as a platform secret and referenced by the `vm_ssh_private_key` output. If you prefer your own SSH key pair, create `general` type secrets containing the values named `edge_key_public` and `edge_key_private` respectively.
+- The management tap interface is always provisioned regardless of additional NIC configuration, and always occupies the last `enp*s0` interface slot.
 - `accept_dhcp_routes` on additional NICs defaults to `false` to prevent unintended default route conflicts with the primary NIC.
-- **Multi-VM Considerations**: Each additional VM requires a unique `vm_name` within the deployment. VM names are used as correlation keys for NICs, disks, and passthrough devices.
-- **Resource Planning**: Ensure target endpoints have sufficient resources for all planned VMs, especially when deploying multiple VMs with high resource requirements.
-- **Network Segments**: Verify that all required network segments exist on target endpoints before deploying multi-VM configurations.
-- **Scaling Limits**: The maximum number of additional VMs is 9. For larger deployments, consider multiple blueprint deployments.
+- All additional VMs share the same OS type, username, password, and SSH keys as the base VM.
+- The maximum number of VMs per deployment is 10. For larger deployments, use multiple blueprint deployments.
