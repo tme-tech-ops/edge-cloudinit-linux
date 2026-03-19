@@ -89,6 +89,7 @@ inputs:
   vm_hostname:
     type: string
     hidden: false
+    allow_update: false
     display_label: VM Hostname
     description: |
       Hostname of the Virtual Machine

@@ -15,16 +15,16 @@ During deployment, inputs can be provided through the UI form or by uploading a 
 
 ## Table of Contents
 
-[Supported Features](#supported-features)
-[Getting Started](#getting-started)
-[Prerequisites](#prerequisites)
-[Secrets](#secrets)
-[Inputs](#inputs)
-[Outputs / Capabilities](#outputs--capabilities)
-[Network Interface Layout](#network-interface-layout)
-[Multi-VM Deployment](#multi-vm-deployment)
-[Usage Examples](#usage-examples)
-[Notes](#notes)
+[Supported Features](#supported-features)  
+[Getting Started](#getting-started)  
+[Prerequisites](#prerequisites)  
+[Secrets](#secrets)  
+[Inputs](#inputs)  
+[Outputs / Capabilities](#outputs--capabilities)  
+[Network Interface Layout](#network-interface-layout)  
+[Multi-VM Deployment](#multi-vm-deployment)  
+[Usage Examples](#usage-examples)  
+[Notes](#notes)  
 
 ---
 
@@ -42,7 +42,7 @@ During deployment, inputs can be provided through the UI form or by uploading a 
 | **Device Passthrough** | USB, PCIe, GPU, Video, and Serial port passthrough |
 | **SSH Key Automation** | SSH keypair generated automatically at deploy time |
 
-> **Note:** This blueprint creates a cloud-init configuration tuned for networkd and netplan, which is default for Ubuntu. Adjust other OS platforms accordingly.
+> **Note:** This blueprint creates a cloud-init configuration tuned for networkd and netplan, which is default for Ubuntu. Adjust other OS platforms cloud images accordingly before deployment.
 
 ---
 
@@ -114,7 +114,7 @@ This secret holds the login password for the VM user account. Type the password 
 | DNS Servers | `dns` | List | `[]` | Yes | List of DNS server IP addresses |
 
 **Supported OS Types:** `UBUNTU18.04`, `UBUNTU20.04`, `UBUNTU22.04`, `UBUNTU22.10`, `UBUNTU24.04`, `DEBIAN-32B`, `DEBIAN-64B`, `RHEL9`, `SUSE-SLES15`, `LINUX-OTHER`
-> **Note:** This blueprint creates a cloud-init configuration tuned for networkd and netplan, which is default for Ubuntu. Adjust other OS platforms accordingly.
+> **Note:** This blueprint creates a cloud-init configuration tuned for networkd and netplan, which is default for Ubuntu. Adjust other OS platforms cloud images accordingly before deployment.
 
 ---
 
