@@ -52,7 +52,7 @@ node_templates:
           implementation: vm/scripts/prepare_base_vm_config.py
           executor: central_deployment_agent
           inputs:
-            primary_segment: { get_input: segment_name }
+            primary_segment: { get_input: vnic_0_segment_name }
             primary_port_forwards: { get_input: port_forward_rules }
             vm_add_nics: { get_input: vm_add_nics }
             use_dhcp: { get_input: use_dhcp }
@@ -91,7 +91,7 @@ node_templates:
             cpu: { get_input: vcpus }
             memory: { get_input: memory_size }
             storage: { get_input: os_disk_size }
-            disk: { get_input: disk }
+            disk: { get_input: disk_wrapper }
             disk_controller: { get_input: disk_controller }
             hardware_options.vTPM: { get_input: hardware_options.vTPM }
             hardware_options.secure_boot: { get_input: hardware_options.secure_boot }
@@ -106,11 +106,11 @@ node_templates:
                 - "_private"
             vm_hostname: { get_input: vm_hostname }
             additional_disks: { get_input: additional_disks }
-            usb: { get_input: usb }
-            serial_port: { get_input: serial_port }
-            gpu: { get_input: gpu }
+            usb: { get_input: usb_wrapper }
+            serial_port: { get_input: serial_port_wrapper }
+            gpu: { get_input: gpu_wrapper }
             video: { get_input: video }
-            pcie: { get_input: pcie }
+            pcie: { get_input: pcie_wrapper }
             iso_files: { get_input: iso_files }
             boot_order: { get_input: boot_order }
     relationships:

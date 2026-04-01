@@ -577,59 +577,6 @@ inputs:
 
 # Hidden VM
 
-  usb:
-    type: list
-    item_type: string
-    hidden: true
-    allow_update: false
-    display_label: USB Device list
-    description: >
-      A list of USB logical names (string). USB-1 to USB-10 for Passthrough.
-    required: false
-    default: {  get_input: usb_wrapper }
-
-  gpu:
-    type: list
-    item_type: string
-    hidden: true
-    allow_update: false
-    display_label: GPU Passthrough
-    description: >
-      GPU passthrough. A list of GPU logical names (string). NVIDIA_A2-Slot1 to
-      NVIDIA_A2-Slot8, NVIDIA_A30-Slot1 to NVIDIA_A30-Slot8
-    required: false
-    default: { get_input: gpu_wrapper }
-
-  pcie:
-    type: list
-    item_type: string
-    display_label: PCIe Passthrough
-    hidden: true
-    allow_update: false
-    description: >
-      PCIe passthrough. A list of PCIe logical names.
-    required: false
-    default: { get_input: pcie_wrapper }
-
-  segment_name:
-    type: string
-    hidden: true
-    allow_update: false
-    required: true
-    display_label: Virtual Network Segment name for Primary Interface
-    description: Name of the Virtual Network Segment.
-    default: { get_input: vnic_0_segment_name }
-
-  disk:
-    type: string
-    display_label: Endpoint Datastore Path
-    allow_update: false
-    hidden: true
-    required: true
-    description: >
-      Deployment datastore path on target Endpoint.
-      Available datastores can be retrieved from inventory service
-    default: { get_input: disk_wrapper }
 
   enable_management:
     type: boolean
@@ -664,20 +611,6 @@ inputs:
     required: false
     default: []
 
-  serial_port:
-    type: list
-    item_type: string
-    hidden: true
-    allow_update: false
-    display_label: Serial Port
-    description: |
-      Serial port passthrough.
-      Please make sure to select the port where required device is connected.
-      Example:
-        - {"port": "COM-1"}
-        - {"port": "COM-2"}
-    required: false
-    default: { get_input: serial_port_wrapper }
 
   boot_order:
     type: list
