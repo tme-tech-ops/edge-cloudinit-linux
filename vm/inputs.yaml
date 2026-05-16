@@ -75,6 +75,20 @@ inputs:
       group: basic_vm
       index: 10
 
+  utility_blueprint_id_override:
+    type: string
+    hidden: true
+    allow_update: false
+    display_label: Utility VM Blueprint Name Override
+    description: >
+      Hidden override for the utility blueprint id. If non-empty, takes
+      precedence over `utility_blueprint_id`. Used during the
+      edge-cloudinit-windows plan smoke-test phase to target the
+      tenant-temporary `edge-cloudinit-utility-vm-v2` blueprint without
+      affecting the visible default. Production deployments should leave
+      this empty.
+    default: ""
+
   vm_name:
     type: string
     hidden: false
