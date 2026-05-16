@@ -253,7 +253,7 @@ node_templates:
       resource_config:
         blueprint:
           external_resource: true
-          id: { get_attribute: [resolve_utility_blueprint_id, blueprint_id] }
+          id: { get_input: utility_blueprint_id }
         deployment:
           display_name: { concat: ["utility-vm-", get_attribute: [add_vm_prep_config, vm_name]] }
           inputs:
@@ -291,8 +291,6 @@ node_templates:
         target: binary_image
       - type: dell.relationships.depends_on
         target: ssh_keys
-      - type: dell.relationships.depends_on
-        target: resolve_utility_blueprint_id
 
   vm_results:
     type: dell.nodes.ApplicationModule

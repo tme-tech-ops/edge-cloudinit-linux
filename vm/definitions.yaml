@@ -44,17 +44,6 @@ node_templates:
           implementation:
             edge.nativeedge_plugin.tasks.delete_binary
 
-  resolve_utility_blueprint_id:
-    type: dell.nodes.ApplicationModule
-    interfaces:
-      dell.interfaces.lifecycle:
-        precreate:
-          implementation: vm/scripts/resolve_utility_blueprint_id.py
-          executor: central_deployment_agent
-          inputs:
-            primary: { get_input: utility_blueprint_id }
-            override: { get_input: utility_blueprint_id_override }
-
   prep_config:
     type: dell.nodes.ApplicationModule
     interfaces:
@@ -91,7 +80,7 @@ node_templates:
       resource_config:
         blueprint:
           external_resource: true
-          id: { get_attribute: [resolve_utility_blueprint_id, blueprint_id] }
+          id: { get_input: utility_blueprint_id }
         deployment:
           display_name: { concat: ["utility-vm-", get_input: vm_name] }
           inputs:
@@ -127,8 +116,6 @@ node_templates:
     relationships:
       - type: dell.relationships.depends_on
         target: prep_config
-      - type: dell.relationships.depends_on
-        target: resolve_utility_blueprint_id
       - type: dell.relationships.depends_on
         target: binary_image
       - type: dell.relationships.depends_on
