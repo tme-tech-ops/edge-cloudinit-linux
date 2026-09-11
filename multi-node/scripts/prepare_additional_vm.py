@@ -313,21 +313,21 @@ if __name__ == "__main__":
         'use_gateway': inputs.get(f'{prefix}use_gateway', False),
         'gateway': inputs.get(f'{prefix}gateway', ''),
         'use_dns': inputs.get(f'{prefix}use_dns', False),
-        'dns': inputs.get(f'{prefix}dns', []),
+        'dns': inputs.get(f'{prefix}dns') or [],
         'use_nat': inputs.get(f'{prefix}use_nat', False),
-        'port_forward_rules': inputs.get(f'{prefix}port_forward_rules', []),
+        'port_forward_rules': inputs.get(f'{prefix}port_forward_rules') or [],
     }
 
     # Read per-VM lists directly (no vm_name filtering needed)
-    my_add_nics = inputs.get(f'{prefix}vm_add_nics', [])
-    my_add_disks = inputs.get(f'{prefix}additional_disks', [])
+    my_add_nics = inputs.get(f'{prefix}vm_add_nics') or []
+    my_add_disks = inputs.get(f'{prefix}additional_disks') or []
 
     # Read passthrough devices directly (already separated by type)
-    usb = inputs.get(f'{prefix}usb_wrapper', [])
-    gpu = inputs.get(f'{prefix}gpu_wrapper', [])
-    pcie = inputs.get(f'{prefix}pcie_wrapper', [])
-    video = inputs.get(f'{prefix}video', [])
-    serial_port = inputs.get(f'{prefix}serial_port_wrapper', [])
+    usb = inputs.get(f'{prefix}usb_wrapper') or []
+    gpu = inputs.get(f'{prefix}gpu_wrapper') or []
+    pcie = inputs.get(f'{prefix}pcie_wrapper') or []
+    video = inputs.get(f'{prefix}video') or []
+    serial_port = inputs.get(f'{prefix}serial_port_wrapper') or []
 
     ctx.logger.info(
         f"VM #{vm_number}: {len(my_add_nics)} additional NIC(s), "

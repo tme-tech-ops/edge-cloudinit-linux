@@ -244,8 +244,8 @@ def deep_merge(base, override):
 if __name__ == "__main__":
     # Read inputs
     primary_segment = inputs.get('primary_segment', '')
-    primary_port_forwards = inputs.get('primary_port_forwards', [])
-    vm_add_nics = inputs.get('vm_add_nics', [])
+    primary_port_forwards = inputs.get('primary_port_forwards') or []
+    vm_add_nics = inputs.get('vm_add_nics') or []
     use_dhcp = inputs.get('use_dhcp', True)
     static_ip = inputs.get('static_ip', '')
     use_gateway = inputs.get('use_gateway', False)

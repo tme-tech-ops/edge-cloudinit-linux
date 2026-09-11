@@ -16,6 +16,7 @@ During deployment, inputs can be provided through the UI form or by uploading a 
 ## Table of Contents
 
 [Supported Features](#supported-features)  
+[Compatibility Matrix](#compatibility-matrix)
 [Getting Started](#getting-started)  
 [Prerequisites](#prerequisites)  
 [Secrets](#secrets)  
@@ -43,6 +44,15 @@ During deployment, inputs can be provided through the UI form or by uploading a 
 | **SSH Key Automation** | SSH keypair generated automatically at deploy time |
 
 > **Note:** This blueprint creates a cloud-init configuration tuned for networkd and netplan, which is default for Ubuntu. Adjust other OS platforms cloud images accordingly before deployment.
+
+---
+
+## Compatibility Matrix
+
+| Release | Compatible DDPC EdgeOS Version |
+|---|---|
+| `rel-4.2.0.0` | `4.2.0.0` |
+| `rel-4.3.0.0` | `4.3.0.0` |
 
 ---
 

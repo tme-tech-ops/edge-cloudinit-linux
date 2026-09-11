@@ -664,17 +664,6 @@ inputs:
       - get_input: edge_os_image_secret
       - binary_image_access_user
 
-  binary_image_access_token:
-    type: list
-    hidden: true
-    display_label: Virtual Machine Image Repository Token Secret Name
-    description: |
-      Name of the secret storing the Token to the Repository of the
-      Image Binary that will be used to create the Virtual Machine.
-    default:
-    - get_input: edge_os_image_secret
-    - binary_image_access_token
-
   binary_image_version:
     type: string
     hidden: true

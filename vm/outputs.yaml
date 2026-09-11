@@ -12,5 +12,5 @@ capabilities:
         - "_private"
 
   vm_password_secret:
-    description: Virtual Machine Password
-    value: { get_secret: { get_input: vm_password } }
+    description: Virtual Machine Password Secret Name
+    value: { get_input: vm_password }

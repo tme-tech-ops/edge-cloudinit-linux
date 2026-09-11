@@ -1,8 +1,3 @@
-imports:
-  - dell/types/types.yaml
-  - plugin:edge-plugin?version= >=3.3.17.0,<4.0.0.0
-  - plugin:utilities-plugin?version= >=3.1.4.0,<4.0.0.0
-
 node_templates:
 
   ssh_keys:
@@ -30,7 +25,10 @@ node_templates:
         artifact:
           path: { get_input: binary_image_url }
           username: { get_input: binary_image_access_user }
-          access_token: { get_secret: { get_input: binary_image_access_token } }
+          access_token:
+            get_secret:
+              - get_input: edge_os_image_secret
+              - binary_image_access_token
         version: { get_input: binary_image_version }
     interfaces:
       dell.interfaces.lifecycle:
