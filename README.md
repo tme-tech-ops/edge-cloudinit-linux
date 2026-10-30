@@ -273,7 +273,8 @@ passthrough. Changing those needs a new deployment.
 - **Tick Force** when an app is deployed on one of the VMs (a `utility-vm-...`
   deployment is its "Deploy On" target). DAP refuses to update a deployment
   that others depend on, and the update would fail after retrying for about 20
-  minutes.
+  minutes. If you forget, the update's log warns within its first minute
+  ("update checks: ... needs Force"): cancel it and run it again with Force.
 - **Keep "Run automatic reinstall" unchecked.** This blueprint refuses disk
   shrinks before any VM changes, but if the Endpoint refuses some other change,
   automatic reinstall makes the orchestrator delete and recreate that VM (and
@@ -283,7 +284,8 @@ passthrough. Changing those needs a new deployment.
   this deployment fails too: DAP's repair (heal) of that VM deployment is
   refused while the app depends on it. Repair it first: run **Heal** on the
   `utility-vm-...` deployment with **Force** (or an update of it with no changes
-  and Force), then update this deployment again. Neither changes the VM.
+  and Force), then update this deployment again. Neither changes the VM. The
+  update's log warns about this case too ("needs a repair").
 - **After a failed update**, the deployment keeps the new input values. Run
   another update with the values the VMs really have.
 - An update with no change doesn't touch the VMs.

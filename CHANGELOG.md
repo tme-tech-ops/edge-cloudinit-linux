@@ -35,6 +35,11 @@ later 1.x revision.
   an additional disk ("Disks can only grow"), with the VMs left as they are.
   With "Run automatic reinstall" the Endpoint's refusal used to make the
   orchestrator delete and recreate the VM.
+- Added: `update_checks` warns at the start of an update when an app deployed
+  on a VM will block it: the update changes something and Force is off, or a
+  VM deployment needs a repair (heal) that DAP refuses while an app is on it.
+  Before, the update retried for about 20 minutes before failing. The warning
+  never fails the update.
 - Changed: only inputs that a running VM can apply are updatable: vCPUs,
   memory, OS disk size (grow only), primary segment, NAT port forwarding and
   additional disks (base VM and VMs 2-10), plus the utility revision.
