@@ -281,9 +281,9 @@ passthrough. Changing those needs a new deployment.
 - **If an update fails while an app is deployed on a VM**, the VM's
   `utility-vm-...` deployment stays in "failed update", and the next update of
   this deployment fails too: DAP's repair (heal) of that VM deployment is
-  refused while the app depends on it. Repair it first: run an update of the
-  `utility-vm-...` deployment with no changes and **Force** ticked, then update
-  this deployment again.
+  refused while the app depends on it. Repair it first: run **Heal** on the
+  `utility-vm-...` deployment with **Force** (or an update of it with no changes
+  and Force), then update this deployment again. Neither changes the VM.
 - **After a failed update**, the deployment keeps the new input values. Run
   another update with the values the VMs really have.
 - An update with no change doesn't touch the VMs.
