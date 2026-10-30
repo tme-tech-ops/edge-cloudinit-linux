@@ -31,6 +31,10 @@ later 1.x revision.
   show for VMs that don't exist, prefilled with "null", and block the form.
   They are now hidden with their VM, and the IP patterns accept the stored
   null values.
+- Added: `update_checks` fails an update that would shrink a VM's OS disk or
+  an additional disk ("Disks can only grow"), with the VMs left as they are.
+  With "Run automatic reinstall" the Endpoint's refusal used to make the
+  orchestrator delete and recreate the VM.
 - Changed: only inputs that a running VM can apply are updatable: vCPUs,
   memory, OS disk size (grow only), primary segment, NAT port forwarding and
   additional disks (base VM and VMs 2-10), plus the utility revision.

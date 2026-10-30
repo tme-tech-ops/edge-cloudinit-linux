@@ -259,7 +259,7 @@ VMs 2-10):
 | Input | Change | Notes |
 |---|---|---|
 | vCPUs, Memory Size | up or down | The VM reboots. |
-| OS Disk Size | grow only | The Endpoint refuses to shrink a disk (the update fails and the VM is unchanged). The root file system grows at boot. |
+| OS Disk Size | grow only | A smaller size fails the update with "Disks can only grow" and the VMs stay as they are. The root file system grows at boot. |
 | Virtual Network Segment (primary NIC) | another segment | The VM reboots and keeps its MAC; with DHCP it gets an address on the new segment. A static IP stays as configured, so pick a segment where it is valid. |
 | Enable NAT Port Forwarding, Port Mapping | add, change, remove rules | Applied on the Endpoint. |
 | Add Additional Disks, Additional Disks | add, grow, remove | Removing a disk (or unticking Add Additional Disks) deletes it and its data. The guest doesn't partition or mount the disks. |
@@ -274,9 +274,16 @@ passthrough. Changing those needs a new deployment.
   deployment is its "Deploy On" target). DAP refuses to update a deployment
   that others depend on, and the update would fail after retrying for about 20
   minutes.
-- **Keep "Run automatic reinstall" unchecked.** If the Endpoint refuses a
-  change, the update fails and nothing changes. With automatic reinstall, the
-  orchestrator would instead delete and recreate the VM (and its disk).
+- **Keep "Run automatic reinstall" unchecked.** This blueprint refuses disk
+  shrinks before any VM changes, but if the Endpoint refuses some other change,
+  automatic reinstall makes the orchestrator delete and recreate that VM (and
+  its disk) instead of failing the update.
+- **If an update fails while an app is deployed on a VM**, the VM's
+  `utility-vm-...` deployment stays in "failed update", and the next update of
+  this deployment fails too: DAP's repair (heal) of that VM deployment is
+  refused while the app depends on it. Repair it first: run an update of the
+  `utility-vm-...` deployment with no changes and **Force** ticked, then update
+  this deployment again.
 - **After a failed update**, the deployment keeps the new input values. Run
   another update with the values the VMs really have.
 - An update with no change doesn't touch the VMs.
