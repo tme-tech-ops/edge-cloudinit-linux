@@ -431,6 +431,26 @@ node_templates:
       - type: dell.relationships.depends_on
         target: add_vm
 
+  # Refuses an update a VM can't apply (a smaller disk) before anything
+  # changes. See vm/scripts/update_checks.py.
+  update_checks:
+    type: dell.nodes.Root
+    interfaces:
+      dell.interfaces.lifecycle:
+        check_drift:
+          implementation: vm/scripts/update_checks.py
+          executor: central_deployment_agent
+          inputs:
+            base:
+              name: { get_input: vm_name }
+              storage: { get_input: os_disk_size }
+              add_disks: { get_input: add_disks }
+              disks: { get_input: additional_disks }
+            others: *add_vm_settings
+    relationships:
+      - type: dell.relationships.depends_on
+        target: prep_config
+
 groups:
   add_vm_group:
     members:
