@@ -7,9 +7,11 @@ This blueprint may be used standalone or as a target environment for the **tme-t
 ## Getting Started
 
 1. Download the **edge-cloudinit-utility-vm** blueprint from the [edge-cloudinit-utility-vm repository](https://tme-tech-ops/edge-cloudinit-utility-vm) using **Code > Download ZIP**.
-2. Upload it from the **Blueprints** page in the Dell Automation Platform. It is recommended to name this blueprint `edge-cloudinit-utility-vm`.
+2. Upload it from the **Blueprints** page in the Dell Automation Platform with the name `edge-cloudinit-utility-vm` and the revision `1.2.0.0` (its version, top of its `CHANGELOG.md`). This blueprint creates its VMs from exactly that revision (input `Utility VM Blueprint Revision`).
 3. Download this blueprint using **Code > Download ZIP**.
-4. Upload it from the **Blueprints** page.
+4. Upload it from the **Blueprints** page with the revision `1.2.0.0` (the version at the top of `CHANGELOG.md`).
+
+Versions are `MAJOR.MINOR.PATCH.BUILD` and are also the catalog revisions to upload with. This blueprint works with any utility revision of the same MAJOR and an equal or higher MINOR.
 
 During deployment, inputs can be provided through the UI form or by uploading a JSON/YAML input file through the UI.
 
@@ -49,10 +51,11 @@ During deployment, inputs can be provided through the UI form or by uploading a 
 
 ## Compatibility Matrix
 
-| Release | Compatible DDPC EdgeOS Version |
-|---|---|
-| `rel-4.2.0.0` | `4.2.0.0` |
-| `rel-4.3.0.0` | `4.3.0.0` |
+| Release | Compatible DDPC EdgeOS Version | edge-cloudinit-linux | edge-cloudinit-utility-vm |
+|---|---|---|---|
+| `rel-4.2.0.0` | `4.2.0.0` | 1.1.0.x | 1.1.0.x |
+| `rel-4.3.0.0` | `4.3.0.0` | 1.1.0.x | 1.1.0.x |
+| (next) | `4.3.0.0` | 1.2.0.0 | 1.2.0.0 |
 
 ---
 
@@ -113,15 +116,16 @@ This secret holds the login password for the VM user account. Type the password 
 |---|---|---|---|---|---|
 | OS Type | `os_type` | String | `UBUNTU22.04` | No | Operating system type |
 | Utility Blueprint Name | `utility_blueprint_id` | String | `edge-cloudinit-utility-vm` | No | Name of the uploaded edge-cloudinit utility blueprint |
-| VM Name | `vm_name` | String | `edge-cloudinit-01` | Yes | Name of the Virtual Machine |
-| VM Hostname | `vm_hostname` | String | `edgehost-01` | Yes | Hostname (letters, numbers, hyphens only; max 63 chars) |
+| Utility VM Blueprint Revision | `utility_blueprint_revision` | String | `1.2.0.0` | Yes | Revision of the utility blueprint the VMs are created from. Updating it moves the running VMs to that revision |
+| VM Name | `vm_name` | String | `edge-cloudinit-01` | No | Name of the Virtual Machine |
+| VM Hostname | `vm_hostname` | String | `edgehost-01` | No | Hostname (letters, numbers, hyphens only; max 63 chars) |
 | VM Username | `vm_user_name` | String | `edgeuser` | No | Login username for the VM |
-| Use DHCP | `use_dhcp` | Boolean | `true` | Yes | Use DHCP on the primary NIC. If false, configure static IP below |
-| Static IP/CIDR | `static_ip` | String | — | Yes | Static IP in CIDR notation (e.g. `192.168.1.100/24`). Required when DHCP is disabled |
-| Use Gateway | `use_gateway` | Boolean | `false` | Yes | Configure a default gateway |
-| Gateway IP | `gateway` | String | — | Yes | Gateway IP address (e.g. `192.168.1.1`) |
-| Use DNS | `use_dns` | Boolean | `false` | Yes | Configure DNS servers |
-| DNS Servers | `dns` | List | `[]` | Yes | List of DNS server IP addresses |
+| Use DHCP | `use_dhcp` | Boolean | `true` | No | Use DHCP on the primary NIC. If false, configure static IP below |
+| Static IP/CIDR | `static_ip` | String | — | No | Static IP in CIDR notation (e.g. `192.168.1.100/24`). Required when DHCP is disabled |
+| Use Gateway | `use_gateway` | Boolean | `false` | No | Configure a default gateway |
+| Gateway IP | `gateway` | String | — | No | Gateway IP address (e.g. `192.168.1.1`) |
+| Use DNS | `use_dns` | Boolean | `false` | No | Configure DNS servers |
+| DNS Servers | `dns` | List | `[]` | No | List of DNS server IP addresses |
 
 **Supported OS Types:** `UBUNTU18.04`, `UBUNTU20.04`, `UBUNTU22.04`, `UBUNTU22.10`, `UBUNTU24.04`, `DEBIAN-32B`, `DEBIAN-64B`, `RHEL9`, `SUSE-SLES15`, `LINUX-OTHER`
 > **Note:** This blueprint creates a cloud-init configuration tuned for networkd and netplan, which is default for Ubuntu. Adjust other OS platforms cloud images accordingly before deployment.
@@ -139,7 +143,7 @@ This secret holds the login password for the VM user account. Type the password 
 | Add vTPM | `hardware_options.vTPM` | Boolean | `false` | No | Add a virtual TPM (typically required for Secure Boot) |
 | vCPUs | `vcpus` | Integer | `2` | Yes | Number of virtual CPUs (minimum 2) |
 | Memory Size | `memory_size` | String | `4GB` | Yes | RAM allocation — value + unit (e.g. `8GB`) |
-| Disk Controller | `disk_controller` | String | `VIRTIO` | Yes | Disk controller type: `VIRTIO`, `SATA`, or `SCSI` |
+| Disk Controller | `disk_controller` | String | `VIRTIO` | No | Disk controller type: `VIRTIO`, `SATA`, or `SCSI` |
 
 #### Additional Disks
 
@@ -242,6 +246,40 @@ When deploying additional VMs (`number_of_vms` > 1):
 | `additional_vm` | Dictionary of additional VMs keyed by VM name, each containing name, hostname, primary IP, service tag, network interfaces, and SSH info |
 
 ---
+
+## Updating a deployment
+
+Update the **edge-cloudinit-linux deployment**, not the `utility-vm-...`
+deployments it creates: those refuse direct updates, because this deployment
+would undo them on its next update.
+
+What can change on running VMs (base VM inputs and the same `vm_N_` inputs of
+VMs 2-10):
+
+| Input | Change | Notes |
+|---|---|---|
+| vCPUs, Memory Size | up or down | The VM reboots. |
+| OS Disk Size | grow only | The Endpoint refuses to shrink a disk (the update fails and the VM is unchanged). The root file system grows at boot. |
+| Virtual Network Segment (primary NIC) | another segment | The VM reboots and keeps its MAC; with DHCP it gets an address on the new segment. A static IP stays as configured, so pick a segment where it is valid. |
+| Enable NAT Port Forwarding, Port Mapping | add, change, remove rules | Applied on the Endpoint. |
+| Add Additional Disks, Additional Disks | add, grow, remove | Removing a disk (or unticking Add Additional Disks) deletes it and its data. The guest doesn't partition or mount the disks. |
+| Utility VM Blueprint Revision | a newer revision of the same major version | Upload that revision first. |
+
+Everything set by cloud-init or when the VM is created is locked: VM names,
+hostnames, OS image and type, user and password, IP/gateway/DNS settings,
+firmware options, disk controller, number of VMs, additional NICs and device
+passthrough. Changing those needs a new deployment.
+
+- **Tick Force** when an app is deployed on one of the VMs (a `utility-vm-...`
+  deployment is its "Deploy On" target). DAP refuses to update a deployment
+  that others depend on, and the update would fail after retrying for about 20
+  minutes.
+- **Keep "Run automatic reinstall" unchecked.** If the Endpoint refuses a
+  change, the update fails and nothing changes. With automatic reinstall, the
+  orchestrator would instead delete and recreate the VM (and its disk).
+- **After a failed update**, the deployment keeps the new input values. Run
+  another update with the values the VMs really have.
+- An update with no change doesn't touch the VMs.
 
 ## Network Interface Layout
 

@@ -203,6 +203,7 @@ inputs:
     constraints:
     - labels:
       - cloud: nativeedge
+      error_message: Select a NativeEdge Endpoint.
     display:
       group: multi_node
       index: 700
@@ -216,6 +217,7 @@ inputs:
 
   vm_7_name:
     type: string
+    allow_update: false
     hidden: false
     display_label: 'VM #7 Name'
     description: |
@@ -234,6 +236,7 @@ inputs:
 
   vm_7_hostname:
     type: string
+    allow_update: false
     hidden: false
     display_label: 'VM #7 Hostname'
     description: |
@@ -247,6 +250,7 @@ inputs:
         Must be letters (a-z, A-Z), numbers (0-9), or hyphens (-).
         No more than 64 characters.
     - max_length: 64
+      error_message: Must be at most 64 characters.
     default: edgehost-07
     display:
       group: multi_node
@@ -268,6 +272,7 @@ inputs:
     default: 2
     constraints:
     - greater_or_equal: 2
+      error_message: Must be at least 2.
     display:
       group: multi_node
       index: 703
@@ -328,7 +333,7 @@ inputs:
   vm_7_disk_controller:
     type: string
     display_label: 'VM #7 Disk Controller'
-    allow_update: true
+    allow_update: false
     description: >
       Deployment disk controller.
     default: VIRTIO
@@ -338,6 +343,7 @@ inputs:
           - 'VIRTIO'
           - 'SATA'
           - 'SCSI'
+        error_message: Select one of the listed values.
     display:
       group: multi_node
       index: 706
@@ -364,6 +370,7 @@ inputs:
               get_capability:
               - get_input: deployment_id_07
               - ece_service_tag
+        error_message: Select one of the listed values.
     display:
       group: multi_node
       index: 707
@@ -389,6 +396,7 @@ inputs:
             get_capability:
             - get_input: deployment_id_07
             - ece_service_tag
+      error_message: Select one of the listed values.
     display:
       group: multi_node
       index: 708
@@ -401,6 +409,7 @@ inputs:
 
   vm_7_use_dhcp:
     type: boolean
+    allow_update: false
     hidden: false
     display_label: 'VM #7 Use DHCP'
     description: |
@@ -418,14 +427,21 @@ inputs:
 
   vm_7_static_ip:
     type: string
+    allow_update: false
     hidden: false
     exclusive_with: vm_7_use_dhcp
+    only_with:
+      number_of_vms:
+      - 7
+      - 8
+      - 9
+      - 10
     display_label: 'VM #7 Static IP in CIDR notation'
     description: |
       Static IP Address in CIDR notation that will be assigned to the VM
       Example: 192.168.0.100/24
     constraints:
-    - pattern: '^(?:((25[0-5]|2[0-4]\d|1\d\d|\d{1,2})(\.(25[0-5]|2[0-4]\d|1\d\d|\d{1,2})){3})\/(3[0-2]|[12]?\d)|)$'
+    - pattern: '^(?:((25[0-5]|2[0-4]\d|1\d\d|\d{1,2})(\.(25[0-5]|2[0-4]\d|1\d\d|\d{1,2})){3})\/(3[0-2]|[12]?\d)|)$|^null$|^None$'
       error_message: |
         Invalid format for IP Address in CIDR format.
         Example: 172.16.0.1/16
@@ -436,8 +452,15 @@ inputs:
 
   vm_7_use_gateway:
     type: boolean
+    allow_update: false
     hidden: false
     exclusive_with: vm_7_use_dhcp
+    only_with:
+      number_of_vms:
+      - 7
+      - 8
+      - 9
+      - 10
     display_label: 'VM #7 Use Gateway'
     description: |
       If false, Gateway will not be configured
@@ -448,13 +471,14 @@ inputs:
 
   vm_7_gateway:
     type: string
+    allow_update: false
     hidden: false
     only_with: vm_7_use_gateway
     display_label: 'VM #7 Gateway IP'
     description: IP address of the default gateway.
     required: false
     constraints:
-    - pattern: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$|^$
+    - pattern: '^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$|^$|^null$|^None$'
       error_message: |
         Invalid format for IP Address.
         Example: 172.16.0.1
@@ -464,8 +488,15 @@ inputs:
 
   vm_7_use_dns:
     type: boolean
+    allow_update: false
     hidden: false
     exclusive_with: vm_7_use_dhcp
+    only_with:
+      number_of_vms:
+      - 7
+      - 8
+      - 9
+      - 10
     display_label: 'VM #7 Use DNS'
     description: |
       If false, DNS will not be configured
@@ -476,6 +507,8 @@ inputs:
 
   vm_7_dns:
     type: list
+    item_type: string
+    allow_update: false
     hidden: false
     only_with: vm_7_use_dns
     display_label: 'VM #7 DNS Servers'
@@ -488,6 +521,7 @@ inputs:
 
   vm_7_use_nat:
     type: boolean
+    allow_update: true
     hidden: false
     display_label: 'VM #7 Enable NAT Port Forwarding'
     description: |
@@ -505,6 +539,7 @@ inputs:
 
   vm_7_port_forward_rules:
     type: list
+    allow_update: true
     hidden: false
     only_with: vm_7_use_nat
     item_type: vm_7_port_forward_rules
@@ -520,6 +555,7 @@ inputs:
 
   vm_7_add_nics:
     type: boolean
+    allow_update: false
     hidden: false
     display_label: 'VM #7 Add Network Interfaces'
     description: |
@@ -554,7 +590,7 @@ inputs:
   vm_7_add_disks:
     type: boolean
     hidden: false
-    allow_update: false
+    allow_update: true
     display_label: 'VM #7 Add Disks'
     description: |
       Check to add a list of additional disks
@@ -573,7 +609,7 @@ inputs:
     type: list
     item_type: vm_7_additional_disks
     hidden: false
-    allow_update: false
+    allow_update: true
     only_with: vm_7_add_disks
     display_label: 'VM #7 Optional list of additional Virtual Disks'
     description: >
@@ -586,6 +622,7 @@ inputs:
 
   vm_7_use_passthrough:
     type: boolean
+    allow_update: false
     hidden: false
     display_label: 'VM #7 Enable device passthrough'
     description: |
@@ -619,6 +656,7 @@ inputs:
             get_capability:
             - get_input: deployment_id_07
             - ece_service_tag
+      error_message: Select one of the listed values.
     default: []
     display:
       group: multi_node
@@ -626,6 +664,7 @@ inputs:
 
   vm_7_gpu_wrapper:
     type: list
+    allow_update: false
     item_type: string
     hidden: false
     only_with: vm_7_use_passthrough
@@ -642,6 +681,7 @@ inputs:
             get_capability:
             - get_input: deployment_id_07
             - ece_service_tag
+      error_message: Select one of the listed values.
     default: []
     display:
       group: multi_node
@@ -649,6 +689,7 @@ inputs:
 
   vm_7_pcie_wrapper:
     type: list
+    allow_update: false
     item_type: string
     display_label: 'VM #7 PCIe Passthrough'
     hidden: false
@@ -664,6 +705,7 @@ inputs:
             get_capability:
             - get_input: deployment_id_07
             - ece_service_tag
+      error_message: Select one of the listed values.
     default: []
     display:
       group: multi_node
@@ -671,6 +713,7 @@ inputs:
 
   vm_7_video:
     type: list
+    allow_update: false
     item_type: string
     hidden: false
     only_with: vm_7_use_passthrough
@@ -682,6 +725,7 @@ inputs:
     constraints:
     - valid_values:
         - "onboard controller"
+      error_message: Select one of the listed values.
     default: []
     display:
       group: multi_node
@@ -706,6 +750,7 @@ inputs:
               get_capability:
               - get_input: deployment_id_07
               - ece_service_tag
+        error_message: Select one of the listed values.
     display:
       group: multi_node
       index: 726
