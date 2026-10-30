@@ -310,6 +310,8 @@ The blueprint supports deploying up to 10 VMs from a single deployment using the
 - For each additional VM (2-10), a set of per-VM inputs becomes available in the UI, prefixed with `vm_N_` (e.g. `vm_2_name`, `vm_3_vcpus`).
 - Each additional VM also has a `deployment_id_0N` input (e.g. `deployment_id_02`) to select which NativeEdge Endpoint it will be deployed on.
 - Additional VM inputs only appear in the UI when `number_of_vms` is set to that VM's number or higher.
+- The `deployment_id_0N` inputs are Endpoint pickers (`type: deployment_id`, filtered to NativeEdge Endpoints) so that each VM can run on a different Endpoint. `dap-bpa blueprint lint` reports them as `input-no-deployment-type` (IN-011); this is deliberate, and the base VM uses the Endpoint the deployment is deployed on.
+- VMs 2-10 can be updated like the base VM (see [Updating a deployment](#updating-a-deployment)); the number of VMs is fixed at install.
 
 ### Per-VM Inputs (VMs 2-10)
 
