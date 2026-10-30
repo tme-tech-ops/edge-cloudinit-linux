@@ -7,6 +7,25 @@ def get_vm_name(caps):
     return caps.get('vm_name') or vm_config.get('name') or caps.get('vm_name_id') or ''
 
 
+def child_capabilities(client, inst):
+    """The child deployment's current capabilities.
+
+    The component's own copy (runtime property 'capabilities') is written at
+    install and not refreshed by an update, so read the child directly and fall
+    back to the copy if that fails.
+    """
+    caps = inst.runtime_properties.get('capabilities', {}) or {}
+    child_id = (inst.runtime_properties.get('deployment') or {}).get('id')
+    if child_id:
+        try:
+            caps = client.deployments.capabilities.get(child_id).get(
+                'capabilities') or caps
+        except Exception as err:
+            ctx.logger.warning(
+                f"Capabilities of {child_id} not readable ({err}); using the copy")
+    return caps
+
+
 def build_vm_entry(caps, vm_name):
     """Build a standardized VM result dict from ServiceComponent capabilities."""
     return {
@@ -32,7 +51,7 @@ if __name__ == "__main__":
     )
     base_vm = {}
     for inst in base_instances:
-        caps = inst.runtime_properties.get('capabilities', {})
+        caps = child_capabilities(client, inst)
         vm_name = get_vm_name(caps)
         if vm_name:
             base_vm[vm_name] = build_vm_entry(caps, vm_name)
@@ -49,7 +68,7 @@ if __name__ == "__main__":
 
     additional_vm = {}
     for inst in sorted_instances:
-        caps = inst.runtime_properties.get('capabilities', {})
+        caps = child_capabilities(client, inst)
         vm_name = get_vm_name(caps)
         if vm_name:
             additional_vm[vm_name] = build_vm_entry(caps, vm_name)

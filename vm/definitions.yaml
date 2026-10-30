@@ -1,3 +1,11 @@
+dsl_definitions:
+
+  # For nodes whose output only matters when the VMs are created: they never
+  # drift, so a deployment update never re-runs or reinstalls them.
+  no_drift: &no_drift
+    implementation: vm/scripts/no_drift.py
+    executor: central_deployment_agent
+
 node_templates:
 
   ssh_keys:
@@ -42,6 +50,9 @@ node_templates:
           implementation:
             edge.nativeedge_plugin.tasks.delete_binary
 
+  # Builds the cloud-init config (first boot only) and the additional NICs
+  # (fixed at install). Everything an update can change is built in base_vm's
+  # own properties from the inputs, because an update doesn't re-run this node.
   prep_config:
     type: dell.nodes.ApplicationModule
     interfaces:
@@ -68,10 +79,16 @@ node_templates:
                   - get_attribute: [ssh_keys, secret_key_name]
                   - "_public"
             cloudinit_override: { get_input: cloudinit }
+        check_drift: *no_drift
     relationships:
       - type: dell.relationships.depends_on
         target: ssh_keys
 
+  # The VM itself is a deployment of the utility blueprint. On update, this
+  # component compares the inputs below with the child's and updates the child
+  # with the difference, so every value that can change is computed here from
+  # the inputs (not read from prep_config). Lists are sent as [] rather than
+  # null, so a no-change update finds no difference.
   base_vm:
     type: dell.nodes.ServiceComponent
     properties:
@@ -79,6 +96,7 @@ node_templates:
         blueprint:
           external_resource: true
           id: { get_input: utility_blueprint_id }
+          revision_id: { get_input: utility_blueprint_revision }
         deployment:
           display_name: { concat: ["utility-vm-", get_input: vm_name] }
           inputs:
@@ -95,7 +113,18 @@ node_templates:
             hardware_options.secure_boot: { get_input: hardware_options.secure_boot }
             hardware_options.firmware_type: { get_input: hardware_options.firmware_type }
             enable_management: { get_input: enable_management }
-            network_settings: { get_attribute: [prep_config, network_settings] }
+            # VNIC0 from the inputs (segment and NAT rules can change); the
+            # additional NICs from prep_config (fixed at install).
+            network_settings:
+              jmespath:
+                - >-
+                  [merge({name: 'VNIC0', segment_name: [0].segment},
+                  ([0].nat && [0].rules && {port_fwd_rules: [0].rules}) || `{}`),
+                  ([1] || `[]`)[?name != 'VNIC0']][]
+                - - segment: { get_input: vnic_0_segment_name }
+                    nat: { get_input: use_nat }
+                    rules: { get_input: port_forward_rules }
+                  - { get_attribute: [prep_config, network_settings] }
             cloudinit: { get_attribute: [prep_config, cloudinit_config] }
             vm_user_name: { get_input: vm_user_name }
             ssh_private_key_secret:
@@ -103,12 +132,36 @@ node_templates:
                 - get_attribute: [ssh_keys, secret_key_name]
                 - "_private"
             vm_hostname: { get_input: vm_hostname }
-            additional_disks: { get_input: additional_disks }
-            usb: { get_input: usb_wrapper }
-            serial_port: { get_input: serial_port_wrapper }
-            gpu: { get_input: gpu_wrapper }
-            video: { get_input: video }
-            pcie: { get_input: pcie_wrapper }
+            additional_disks:
+              jmespath:
+                - "([0] && [1]) || `[]`"
+                - - { get_input: add_disks }
+                  - { get_input: additional_disks }
+            usb:
+              jmespath:
+                - "([0] && [1]) || `[]`"
+                - - { get_input: use_passthrough }
+                  - { get_input: usb_wrapper }
+            serial_port:
+              jmespath:
+                - "([0] && [1]) || `[]`"
+                - - { get_input: use_passthrough }
+                  - { get_input: serial_port_wrapper }
+            gpu:
+              jmespath:
+                - "([0] && [1]) || `[]`"
+                - - { get_input: use_passthrough }
+                  - { get_input: gpu_wrapper }
+            video:
+              jmespath:
+                - "([0] && [1]) || `[]`"
+                - - { get_input: use_passthrough }
+                  - { get_input: video }
+            pcie:
+              jmespath:
+                - "([0] && [1]) || `[]`"
+                - - { get_input: use_passthrough }
+                  - { get_input: pcie_wrapper }
             iso_files: { get_input: iso_files }
             boot_order: { get_input: boot_order }
     relationships:

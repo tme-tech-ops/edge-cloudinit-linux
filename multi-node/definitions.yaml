@@ -1,3 +1,109 @@
+dsl_definitions:
+
+  # For nodes whose output only matters when the VMs are created: they never
+  # drift, so a deployment update never re-runs or reinstalls them.
+  no_drift: &no_drift
+    implementation: vm/scripts/no_drift.py
+    executor: central_deployment_agent
+
+  # The settings of VMs 2-10 that an update can change. Each add_vm instance
+  # picks its own entry by VM name (add_vm_prep_config records the name at
+  # install), so an update sends the new values straight from the inputs.
+  add_vm_settings: &add_vm_settings
+    - name: { get_input: vm_2_name }
+      vcpus: { get_input: vm_2_vcpus }
+      memory: { get_input: vm_2_memory_size }
+      storage: { get_input: vm_2_os_disk_size }
+      segment: { get_input: vm_2_vnic_0_segment_name }
+      nat: { get_input: vm_2_use_nat }
+      rules: { get_input: vm_2_port_forward_rules }
+      add_disks: { get_input: vm_2_add_disks }
+      disks: { get_input: vm_2_additional_disks }
+    - name: { get_input: vm_3_name }
+      vcpus: { get_input: vm_3_vcpus }
+      memory: { get_input: vm_3_memory_size }
+      storage: { get_input: vm_3_os_disk_size }
+      segment: { get_input: vm_3_vnic_0_segment_name }
+      nat: { get_input: vm_3_use_nat }
+      rules: { get_input: vm_3_port_forward_rules }
+      add_disks: { get_input: vm_3_add_disks }
+      disks: { get_input: vm_3_additional_disks }
+    - name: { get_input: vm_4_name }
+      vcpus: { get_input: vm_4_vcpus }
+      memory: { get_input: vm_4_memory_size }
+      storage: { get_input: vm_4_os_disk_size }
+      segment: { get_input: vm_4_vnic_0_segment_name }
+      nat: { get_input: vm_4_use_nat }
+      rules: { get_input: vm_4_port_forward_rules }
+      add_disks: { get_input: vm_4_add_disks }
+      disks: { get_input: vm_4_additional_disks }
+    - name: { get_input: vm_5_name }
+      vcpus: { get_input: vm_5_vcpus }
+      memory: { get_input: vm_5_memory_size }
+      storage: { get_input: vm_5_os_disk_size }
+      segment: { get_input: vm_5_vnic_0_segment_name }
+      nat: { get_input: vm_5_use_nat }
+      rules: { get_input: vm_5_port_forward_rules }
+      add_disks: { get_input: vm_5_add_disks }
+      disks: { get_input: vm_5_additional_disks }
+    - name: { get_input: vm_6_name }
+      vcpus: { get_input: vm_6_vcpus }
+      memory: { get_input: vm_6_memory_size }
+      storage: { get_input: vm_6_os_disk_size }
+      segment: { get_input: vm_6_vnic_0_segment_name }
+      nat: { get_input: vm_6_use_nat }
+      rules: { get_input: vm_6_port_forward_rules }
+      add_disks: { get_input: vm_6_add_disks }
+      disks: { get_input: vm_6_additional_disks }
+    - name: { get_input: vm_7_name }
+      vcpus: { get_input: vm_7_vcpus }
+      memory: { get_input: vm_7_memory_size }
+      storage: { get_input: vm_7_os_disk_size }
+      segment: { get_input: vm_7_vnic_0_segment_name }
+      nat: { get_input: vm_7_use_nat }
+      rules: { get_input: vm_7_port_forward_rules }
+      add_disks: { get_input: vm_7_add_disks }
+      disks: { get_input: vm_7_additional_disks }
+    - name: { get_input: vm_8_name }
+      vcpus: { get_input: vm_8_vcpus }
+      memory: { get_input: vm_8_memory_size }
+      storage: { get_input: vm_8_os_disk_size }
+      segment: { get_input: vm_8_vnic_0_segment_name }
+      nat: { get_input: vm_8_use_nat }
+      rules: { get_input: vm_8_port_forward_rules }
+      add_disks: { get_input: vm_8_add_disks }
+      disks: { get_input: vm_8_additional_disks }
+    - name: { get_input: vm_9_name }
+      vcpus: { get_input: vm_9_vcpus }
+      memory: { get_input: vm_9_memory_size }
+      storage: { get_input: vm_9_os_disk_size }
+      segment: { get_input: vm_9_vnic_0_segment_name }
+      nat: { get_input: vm_9_use_nat }
+      rules: { get_input: vm_9_port_forward_rules }
+      add_disks: { get_input: vm_9_add_disks }
+      disks: { get_input: vm_9_additional_disks }
+    - name: { get_input: vm_10_name }
+      vcpus: { get_input: vm_10_vcpus }
+      memory: { get_input: vm_10_memory_size }
+      storage: { get_input: vm_10_os_disk_size }
+      segment: { get_input: vm_10_vnic_0_segment_name }
+      nat: { get_input: vm_10_use_nat }
+      rules: { get_input: vm_10_port_forward_rules }
+      add_disks: { get_input: vm_10_add_disks }
+      disks: { get_input: vm_10_additional_disks }
+
+
+  update_checks: &update_checks
+    implementation: vm/scripts/update_checks.py
+    executor: central_deployment_agent
+    inputs:
+      base:
+        name: { get_input: vm_name }
+        storage: { get_input: os_disk_size }
+        add_disks: { get_input: add_disks }
+        disks: { get_input: additional_disks }
+      others: *add_vm_settings
+
 node_templates:
 
   add_vm_prep_config:
@@ -241,12 +347,16 @@ node_templates:
             vm_10_pcie_wrapper: { get_input: vm_10_pcie_wrapper }
             vm_10_video: { get_input: vm_10_video }
             vm_10_serial_port_wrapper: { get_input: vm_10_serial_port_wrapper }
+        check_drift: *no_drift
     relationships:
       - type: dell.relationships.depends_on
         target: prep_config
       - type: dell.relationships.depends_on
         target: ssh_keys
 
+  # Each additional VM is a deployment of the utility blueprint (see base_vm
+  # in vm/definitions.yaml). Values an update can change come from
+  # add_vm_settings; the rest is fixed at install (add_vm_prep_config).
   add_vm:
     type: dell.nodes.ServiceComponent
     properties:
@@ -254,6 +364,7 @@ node_templates:
         blueprint:
           external_resource: true
           id: { get_input: utility_blueprint_id }
+          revision_id: { get_input: utility_blueprint_revision }
         deployment:
           display_name: { concat: ["utility-vm-", get_attribute: [add_vm_prep_config, vm_name]] }
           inputs:
@@ -261,16 +372,33 @@ node_templates:
             name: { get_attribute: [add_vm_prep_config, vm_name] }
             image: { get_attribute: [binary_image, binary_details, extra, artifact_id] }
             os_type: { get_input: os_type }
-            cpu: { get_attribute: [add_vm_prep_config, vcpus] }
-            memory: { get_attribute: [add_vm_prep_config, memory_size] }
-            storage: { get_attribute: [add_vm_prep_config, os_disk_size] }
+            cpu:
+              jmespath:
+                - concat: ["[?name=='", { get_attribute: [add_vm_prep_config, vm_name] }, "'] | [0].vcpus"]
+                - *add_vm_settings
+            memory:
+              jmespath:
+                - concat: ["[?name=='", { get_attribute: [add_vm_prep_config, vm_name] }, "'] | [0].memory"]
+                - *add_vm_settings
+            storage:
+              jmespath:
+                - concat: ["[?name=='", { get_attribute: [add_vm_prep_config, vm_name] }, "'] | [0].storage"]
+                - *add_vm_settings
             disk: { get_attribute: [add_vm_prep_config, disk] }
             disk_controller: { get_attribute: [add_vm_prep_config, disk_controller] }
             hardware_options.vTPM: { get_input: hardware_options.vTPM }
             hardware_options.secure_boot: { get_input: hardware_options.secure_boot }
             hardware_options.firmware_type: { get_input: hardware_options.firmware_type }
             enable_management: { get_input: enable_management }
-            network_settings: { get_attribute: [add_vm_prep_config, network_settings] }
+            # VNIC0 from the inputs; the additional NICs from add_vm_prep_config.
+            network_settings:
+              jmespath:
+                - concat:
+                    - "[[0][?name=='"
+                    - { get_attribute: [add_vm_prep_config, vm_name] }
+                    - "'] | [0] | merge({name: 'VNIC0', segment_name: segment}, (nat && rules && {port_fwd_rules: rules}) || `{}`), ([1] || `[]`)[?name != 'VNIC0']][]"
+                - - *add_vm_settings
+                  - { get_attribute: [add_vm_prep_config, network_settings] }
             cloudinit: { get_attribute: [add_vm_prep_config, cloudinit_config] }
             vm_user_name: { get_input: vm_user_name }
             ssh_private_key_secret:
@@ -278,12 +406,17 @@ node_templates:
                 - get_attribute: [ssh_keys, secret_key_name]
                 - "_private"
             vm_hostname: { get_attribute: [add_vm_prep_config, vm_hostname] }
-            additional_disks: { get_attribute: [add_vm_prep_config, additional_disks] }
+            additional_disks:
+              jmespath:
+                - concat: ["[?name=='", { get_attribute: [add_vm_prep_config, vm_name] }, "'] | [0] | (add_disks && disks[].{name: name, disk: disk, storage: storage, storage_unit: storage_unit || 'GB'}) || `[]`"]
+                - *add_vm_settings
             usb: { get_attribute: [add_vm_prep_config, usb] }
             serial_port: { get_attribute: [add_vm_prep_config, serial_port] }
             gpu: { get_attribute: [add_vm_prep_config, gpu] }
             video: { get_attribute: [add_vm_prep_config, video] }
             pcie: { get_attribute: [add_vm_prep_config, pcie] }
+            iso_files: { get_input: iso_files }
+            boot_order: { get_input: boot_order }
     relationships:
       - type: dell.relationships.depends_on
         target: add_vm_prep_config
@@ -292,6 +425,8 @@ node_templates:
       - type: dell.relationships.depends_on
         target: ssh_keys
 
+  # Aggregates the VMs' capabilities. Runs again after an update, so the
+  # IPs follow a segment change.
   vm_results:
     type: dell.nodes.ApplicationModule
     interfaces:
@@ -299,11 +434,27 @@ node_templates:
         start:
           implementation: multi-node/scripts/collect_vm_results.py
           executor: central_deployment_agent
+        update:
+          implementation: multi-node/scripts/collect_vm_results.py
+          executor: central_deployment_agent
     relationships:
       - type: dell.relationships.depends_on
         target: base_vm
       - type: dell.relationships.depends_on
         target: add_vm
+
+  # Makes an update a VM can't apply (a smaller disk) fail with the reason,
+  # while the VMs stay as they are. See vm/scripts/update_checks.py.
+  update_checks:
+    type: dell.nodes.Root
+    interfaces:
+      dell.interfaces.lifecycle:
+        create: *update_checks
+        check_drift: *update_checks
+        update: *update_checks
+    relationships:
+      - type: dell.relationships.depends_on
+        target: prep_config
 
 groups:
   add_vm_group:

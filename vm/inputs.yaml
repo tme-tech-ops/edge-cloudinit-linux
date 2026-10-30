@@ -8,6 +8,7 @@ inputs:
     display_label: "Number of Virtual Machines to Create"
     description: "Number of Virtual Machines to Create"
     type: integer
+    allow_update: false
     required: true
     default: 1
     display:
@@ -25,17 +26,19 @@ inputs:
           - 8
           - 9
           - 10
+        error_message: Select one of the listed values.
 
   edge_os_image_secret:
     type: secret_key
     hidden: false
-    allow_update: true
+    allow_update: false
     display_label: OS Image Secret for Virtual Machine creation
     description: |
       Secret containing url, username, access_token, and 
       version of the os image.
     constraints:
     - type: binary_configuration
+      error_message: Select a secret of the required type.
     display:
       group: basic_vm
       index: 1
@@ -59,24 +62,50 @@ inputs:
         - "RHEL9"
         - "SUSE-SLES15"
         - "LINUX-OTHER"
+        error_message: Select one of the listed values.
     display:
       group: basic_vm
       index: 5
 
   utility_blueprint_id:
     type: string
+    allow_update: false
     hidden: false
     display_label: Utility VM Blueprint Name
     description: >
       Name of the uploaded edge-cloudinit Utility blueprint.
       Used for both the base VM and additional VM deployments.
     default: edge-cloudinit-utility-vm
+    constraints:
+      - min_length: 1
+        error_message: The utility blueprint name is required.
     display:
       group: basic_vm
       index: 10
 
+  # The VMs use exactly this revision of the utility blueprint, so uploading a
+  # newer utility revision never changes running VMs on their own.
+  utility_blueprint_revision:
+    type: string
+    allow_update: true
+    hidden: false
+    display_label: Utility VM Blueprint Revision
+    description: >
+      Revision of the utility blueprint the VMs are created from. Upload the
+      utility blueprint with exactly this revision (see the README). To move
+      running VMs to a newer utility revision of the same major version,
+      update the deployment with the new revision.
+    default: "1.2.0.0"
+    constraints:
+      - pattern: '^\S+$'
+        error_message: Enter the utility blueprint revision, for example 1.2.0.0.
+    display:
+      group: basic_vm
+      index: 11
+
   vm_name:
     type: string
+    allow_update: false
     hidden: false
     display_label: VM Name
     description: |
@@ -102,6 +131,7 @@ inputs:
         Must be letters (a-z, A-Z), numbers (0-9), or hyphens (-).
         No more than 64 characters.
     - max_length: 64
+      error_message: Must be at most 64 characters.
     default: edgehost-01
     display:
       group: basic_vm
@@ -125,6 +155,7 @@ inputs:
   
   vm_password:
     type: secret_key
+    allow_update: false
     hidden: false
     display_label: VM Password
     description: |
@@ -132,6 +163,7 @@ inputs:
       See example secret in the blueprint zip for details.
     constraints:
     - type: password
+      error_message: Select a secret of the required type.
     display:
       group: basic_vm
       index: 30
@@ -150,6 +182,7 @@ inputs:
             - extra.hw_core.storage.dataStoreOrVolumes[?((((type=='SSD'||type=='HDD')&&name.contains(@,'DataStore'))||(shared&&name=='/Shared_DataStore'))&&status=='ONLINE')].mountPath
             - get_inventory:
                 get_environment_capability: ece_service_tag
+        error_message: Select one of the listed values.
     display:
       group: basic_vm
       index: 35
@@ -167,12 +200,14 @@ inputs:
         - extra.hw_core.network.virtualSegment[?type=='NAT'||type=='BRIDGE'].name
         - get_inventory:
             get_environment_capability: ece_service_tag
+      error_message: Select one of the listed values.
     display:
       group: basic_vm
       index: 40
 
   use_dhcp:
     type: boolean
+    allow_update: false
     hidden: false
     display_label: Use DHCP
     description: |
@@ -184,6 +219,7 @@ inputs:
 
   static_ip:
     type: string
+    allow_update: false
     hidden: false
     exclusive_with: use_dhcp
     display_label: Static IP in CIDR notation
@@ -191,7 +227,7 @@ inputs:
       Static IP Address in CIDR notation that will be assigned to the VM 
       Example: 192.168.0.100/24
     constraints:
-    - pattern: '^(?:((25[0-5]|2[0-4]\d|1\d\d|\d{1,2})(\.(25[0-5]|2[0-4]\d|1\d\d|\d{1,2})){3})\/(3[0-2]|[12]?\d)|)$'
+    - pattern: '^(?:((25[0-5]|2[0-4]\d|1\d\d|\d{1,2})(\.(25[0-5]|2[0-4]\d|1\d\d|\d{1,2})){3})\/(3[0-2]|[12]?\d)|)$|^null$|^None$'
       error_message: |
         Invalid format for IP Address in CIDR format.
         Example: 172.16.0.1/16
@@ -202,6 +238,7 @@ inputs:
 
   use_gateway:
     type: boolean
+    allow_update: false
     hidden: false
     exclusive_with: use_dhcp
     display_label: Use Gateway
@@ -214,13 +251,14 @@ inputs:
 
   gateway:
     type: string
+    allow_update: false
     hidden: false
     only_with: use_gateway
     display_label: Gateway IP
     description: IP address of the default gateway.
     required: false
     constraints:
-    - pattern: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$|^$
+    - pattern: '^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$|^$|^null$|^None$'
       error_message: |
         Invalid format for IP Address.
         Example: 172.16.0.1
@@ -230,6 +268,7 @@ inputs:
 
   use_dns:
     type: boolean
+    allow_update: false
     hidden: false
     exclusive_with: use_dhcp
     display_label: Use DNS
@@ -242,6 +281,8 @@ inputs:
 
   dns:
     type: list
+    item_type: string
+    allow_update: false
     hidden: false
     only_with: use_dns
     display_label: DNS Servers
@@ -264,6 +305,7 @@ inputs:
     default: BIOS
     constraints:
       - valid_values: [BIOS, UEFI]
+        error_message: Select one of the listed values.
     display:
       group: adv_vm
       index: 1
@@ -304,6 +346,7 @@ inputs:
     default: 2
     constraints:
     - greater_or_equal: 2
+      error_message: Must be at least 2.
     display:
       group: adv_vm
       index: 15
@@ -346,7 +389,7 @@ inputs:
   disk_controller:
     type: string
     display_label: Disk controller
-    allow_update: true
+    allow_update: false
     description: >
       Deployment disk controller.
     default: VIRTIO
@@ -356,6 +399,7 @@ inputs:
           - 'VIRTIO'
           - 'SATA'
           - 'SCSI'
+        error_message: Select one of the listed values.
     display:
       group: adv_vm
       index: 30
@@ -363,7 +407,7 @@ inputs:
   add_disks:
     type: boolean
     hidden: false
-    allow_update: false
+    allow_update: true
     display_label: Add Disks
     description: |
       Check to add a list of additional disks
@@ -376,7 +420,7 @@ inputs:
     type: list
     item_type: additional_disks
     hidden: false
-    allow_update: false
+    allow_update: true
     only_with: add_disks
     display_label: Optional list of additional Virtual Disks
     description: >
@@ -389,6 +433,7 @@ inputs:
  
   use_nat:
     type: boolean
+    allow_update: true
     hidden: false
     display_label: Enable NAT Port Forwarding
     description: |
@@ -400,6 +445,7 @@ inputs:
 
   port_forward_rules:
     type: list
+    allow_update: true
     hidden: false
     only_with: use_nat
     item_type: port_forward_rules
@@ -415,6 +461,7 @@ inputs:
 
   add_nics:
     type: boolean
+    allow_update: false
     hidden: false
     display_label: Add Network Interfaces
     description: |
@@ -442,6 +489,7 @@ inputs:
 
   use_passthrough:
     type: boolean
+    allow_update: false
     hidden: false
     display_label: Enable device passthrough
     description: |
@@ -467,6 +515,7 @@ inputs:
         - extra.hw_core.usbDevice[*].logicalName
         - get_inventory:
             get_environment_capability: ece_service_tag
+      error_message: Select one of the listed values.
     default: []
     display:
       group: adv_vm
@@ -474,6 +523,7 @@ inputs:
 
   gpu_wrapper:
     type: list
+    allow_update: false
     item_type: string
     hidden: false
     only_with: use_passthrough
@@ -488,6 +538,7 @@ inputs:
         - "extra.hw_core.pciDevice[?deviceType=='GPU'].logicalName"
         - get_inventory:
             get_environment_capability: ece_service_tag
+      error_message: Select one of the listed values.
     default: []
     display:
       group: adv_vm
@@ -495,6 +546,7 @@ inputs:
 
   pcie_wrapper:
     type: list
+    allow_update: false
     item_type: string
     display_label: PCIe Passthrough
     hidden: false
@@ -508,6 +560,7 @@ inputs:
         - extra.hw_core.pciDevice[*].logicalName
         - get_inventory:
             get_environment_capability: ece_service_tag
+      error_message: Select one of the listed values.
     default: []
     display:
       group: adv_vm
@@ -515,6 +568,7 @@ inputs:
 
   video:
     type: list
+    allow_update: false
     item_type: string
     hidden: false
     only_with: use_passthrough
@@ -526,6 +580,7 @@ inputs:
     constraints:
     - valid_values:
         - "onboard controller"
+      error_message: Select one of the listed values.
     default: []
     display:
       group: adv_vm
@@ -569,6 +624,7 @@ inputs:
             - '[extra.hw_core.serialPorts[*].{"port":logicalName,"mode":`RS-232`}[*].values(@).join(`_`,@)[],extra.hw_core.serialPorts[*].{"port":logicalName,"mode":`RS-422`}[*].values(@).join(`_`,@)[],extra.hw_core.serialPorts[*].{"port":logicalName,"mode":`RS-485`}[*].values(@).join(`_`,@)[]][]'
             - get_inventory:
                 get_environment_capability: ece_service_tag
+        error_message: Select one of the listed values.
     display:
       group: adv_vm
       index: 90
@@ -654,6 +710,7 @@ inputs:
 
   binary_image_access_user:
     type: string
+    allow_update: false
     hidden: true
     display_label: Virtual Machine Image Repository User Name
     description: |
@@ -666,6 +723,7 @@ inputs:
 
   binary_image_version:
     type: string
+    allow_update: false
     hidden: true
     display_label: Virtual Machine Image Version
     description: |
