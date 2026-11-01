@@ -3,7 +3,7 @@
 All notable changes to this blueprint are recorded here. The version is also
 the catalog revision to upload the blueprint as (see the README).
 
-## 1.2.0.0 - unreleased
+## 1.2.0.0 - 2026-10-31
 
 Deployment updates (Day-2). Needs `edge-cloudinit-utility-vm` 1.2.0.0 or a
 later 1.x revision.

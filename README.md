@@ -51,11 +51,12 @@ During deployment, inputs can be provided through the UI form or by uploading a 
 
 ## Compatibility Matrix
 
-| Release | Compatible DDPC EdgeOS Version | edge-cloudinit-linux | edge-cloudinit-utility-vm |
-|---|---|---|---|
-| `rel-4.2.0.0` | `4.2.0.0` | 1.1.0.x | 1.1.0.x |
-| `rel-4.3.0.0` | `4.3.0.0` | 1.1.0.x | 1.1.0.x |
-| (next) | `4.3.0.0` | 1.2.0.0 | 1.2.0.0 |
+| Release | DAP | DDPC | edge-cloudinit-linux | edge-cloudinit-utility-vm |
+|---|---|---|---|---|
+| [`1.2.0.0`](https://github.com/tme-tech-ops/edge-cloudinit-linux/releases/tag/1.2.0.0) | 2.1.1.0 | 4.3.0.0 | 1.2.0.0 | 1.2.0.0 |
+| [`1.1.5.0`](https://github.com/tme-tech-ops/edge-cloudinit-linux/releases/tag/1.1.5.0) | 2.0.0.1 | 4.2.0.0 | 1.1.5.0 | 1.1.5.0 |
+
+Download the zip attached to the release that matches your DAP and DDPC versions (not "Source code"); its notes give the blueprint name, revision and upload order.
 
 ---
 
